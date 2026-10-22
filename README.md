@@ -125,7 +125,8 @@ Ta sikkerhetskopi før du oppdaterer. For å se de nye testdataene: Innstillinge
   Testdata: obs. 05 (Q = 2,0), 07 (Q = 0,11) og 08 (Q = 28).
 - [ ] **Kontroller Q-tabellene** mot din utgave av NGI-håndboka: Innstillinger → Felles valglister → Q-system.
   Tekstene er oversatt av meg (Claude) og bør leses gjennom av deg.
-- [ ] **Tegning på bilder:** Trykk på et bilde → «✏️ Tegn». Pil og sirkel: dra med fingeren. Tekst: trykk der teksten skal stå.
+- [ ] **Tegning på bilder** (rettet i 0.5.1): Trykk på et bilde → «✏️ Tegn». Frihånd, pil og sirkel: hold fingeren nede og dra.
+  Figuren følger fingeren til du slipper. Tekst: trykk der teksten skal stå. Velg farge og tykkelse (tynn/middels/tykk).
   «Angre», «Tøm», «Avbryt» og «Ferdig». Miniatyren får et ✏️-merke. Originalbildet endres aldri.
 - [ ] **Rosediagram:** Under «Vis skisser og stereonett» på befaringssiden, per objekttype (minst 3 sprekkesett). Bytt mellom Strøk og Fallretning.
 - [ ] **Byggegrop:** «Ny befaring» har nå Byggegrop. Veggene heter Nord/Øst/Sør/Vest, og snitt, oppriss og stereonett virker som for skjæring.

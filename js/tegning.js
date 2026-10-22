@@ -13,12 +13,21 @@ const skrift = (W, H) => Math.max(14, Math.round(Math.max(W, H) * 0.035));
 /** Tegner figurene som SVG-elementer (fungerer både i appen og som tekst for eksport). */
 export function figurerSvg(S, tegning, ekstra = null) {
   const { bredde: W, hoyde: H } = tegning;
-  const sw = strek(W, H);
+  const sw0 = strek(W, H);
   const fs = skrift(W, H);
   const alle = [...(tegning.figurer || []), ...(ekstra ? [ekstra] : [])];
   return alle.map((fg) => {
     const c = fg.farge || '#e03131';
     const kontrast = c === '#111111' ? '#ffffff' : '#000000';
+    const sw = sw0 * (fg.tykkelse || 1);
+    if (fg.type === 'frihand') {
+      const pkt = fg.punkter || [];
+      if (!pkt.length) return null;
+      const d = 'M' + pkt.map((q) => `${Math.round(q[0])},${Math.round(q[1])}`).join('L') + (pkt.length === 1 ? 'l0.1,0' : '');
+      return S('g', null,
+        S('path', { d, fill: 'none', stroke: kontrast, 'stroke-width': sw + 3, 'stroke-opacity': 0.45, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }),
+        S('path', { d, fill: 'none', stroke: c, 'stroke-width': sw, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+    }
     if (fg.type === 'pil') {
       const dx = fg.x2 - fg.x1;
       const dy = fg.y2 - fg.y1;
@@ -44,8 +53,9 @@ export function figurerSvg(S, tegning, ekstra = null) {
         S('ellipse', { cx, cy, rx, ry, fill: 'none', stroke: c, 'stroke-width': sw }));
     }
     if (fg.type === 'tekst') {
+      const fst = fs * (fg.tykkelse || 1);
       return S('text', {
-        x: fg.x1, y: fg.y1, 'font-size': fs, 'font-weight': 700, fill: c, stroke: kontrast, 'stroke-width': Math.max(2, fs * 0.12),
+        x: fg.x1, y: fg.y1, 'font-size': fst, 'font-weight': 700, fill: c, stroke: kontrast, 'stroke-width': Math.max(2, fst * 0.12),
         'paint-order': 'stroke', 'font-family': 'Helvetica, Arial, sans-serif',
       }, fg.tekst || '');
     }
@@ -106,19 +116,30 @@ export async function bildeMedTegning(foto, kvalitet = 0.88) {
 }
 
 // ---------- Tegnemodus ----------
-const VERKTOY = [['pil', '➚ Pil'], ['sirkel', '◯ Sirkel'], ['tekst', 'T Tekst']];
+const VERKTOY = [['frihand', '✎ Frihånd'], ['pil', '➚ Pil'], ['sirkel', '◯ Sirkel'], ['tekst', 'T Tekst']];
+const TYKKELSER = [['Tynn', 0.6], ['Middels', 1], ['Tykk', 1.8]];
 
+/**
+ * Tegneflate. På iPhone brukes berøringshendelser (touch) direkte, og standardoppførselen (rulling/zoom)
+ * stoppes, slik at fingeren kan dra figuren ut uten at Safari avbryter. Mus/penn bruker pekerhendelser.
+ */
 export function Tegnemodus({ foto, onLukk }) {
   const [url, setUrl] = useState(null);
   const [dim, setDim] = useState(foto.bredde && foto.hoyde ? { bredde: foto.bredde, hoyde: foto.hoyde } : null);
   const [figurer, setFigurer] = useState((foto.tegning && foto.tegning.figurer) || []);
-  const [verktoy, setVerktoy] = useState('pil');
+  const [verktoy, setVerktoy] = useState('frihand');
   const [farge, setFarge] = useState('Rød');
+  const [tykkelse, setTykkelse] = useState('Middels');
   const [utkast, setUtkast] = useState(null);
   const [tekstPunkt, setTekstPunkt] = useState(null);
   const [tekst, setTekst] = useState('');
   const svgRef = useRef(null);
   const tekstRef = useRef(null);
+  // Verdier som de faste lytterne trenger (unngår utdaterte verdier i lukkede funksjoner)
+  const tilstand = useRef({});
+  tilstand.current = { dim, verktoy, farge, tykkelse };
+  const utkastRef = useRef(null);
+  const ramme = useRef(0);
 
   useEffect(() => {
     const u = URL.createObjectURL(foto.blob);
@@ -127,32 +148,104 @@ export function Tegnemodus({ foto, onLukk }) {
   }, [foto.id]);
   useEffect(() => { if (tekstPunkt && tekstRef.current) tekstRef.current.focus(); }, [tekstPunkt]);
 
-  const punkt = (e) => {
-    const r = svgRef.current.getBoundingClientRect();
-    return [((e.clientX - r.left) / r.width) * dim.bredde, ((e.clientY - r.top) / r.height) * dim.hoyde];
+  const visUtkast = () => {
+    if (ramme.current) return;
+    ramme.current = requestAnimationFrame(() => {
+      ramme.current = 0;
+      setUtkast(utkastRef.current ? { ...utkastRef.current, punkter: utkastRef.current.punkter && [...utkastRef.current.punkter] } : null);
+    });
   };
-  const ned = (e) => {
-    if (!dim) return;
-    e.preventDefault();
-    const [x, y] = punkt(e);
-    if (verktoy === 'tekst') { setTekstPunkt([x, y]); setTekst(''); return; }
-    svgRef.current.setPointerCapture && svgRef.current.setPointerCapture(e.pointerId);
-    setUtkast({ type: verktoy, x1: x, y1: y, x2: x, y2: y, farge: TEGNEFARGER[farge] });
-  };
-  const flytt = (e) => {
-    if (!utkast) return;
-    e.preventDefault();
-    const [x, y] = punkt(e);
-    setUtkast({ ...utkast, x2: x, y2: y });
-  };
-  const opp = () => {
-    if (!utkast) return;
-    const l = Math.hypot(utkast.x2 - utkast.x1, utkast.y2 - utkast.y1);
-    if (l > Math.max(dim.bredde, dim.hoyde) * 0.015) setFigurer([...figurer, utkast]);
-    setUtkast(null);
-  };
+
+  useEffect(() => {
+    const el = svgRef.current;
+    if (!el || !dim) return undefined;
+    const punkt = (x, y) => {
+      const r = el.getBoundingClientRect();
+      const d = tilstand.current.dim;
+      return [((x - r.left) / r.width) * d.bredde, ((y - r.top) / r.height) * d.hoyde];
+    };
+    const start = (x, y) => {
+      const { verktoy: v, farge: fn, tykkelse: tk } = tilstand.current;
+      const [px, py] = punkt(x, y);
+      if (v === 'tekst') {
+        setTekstPunkt([px, py]);
+        setTekst('');
+        return;
+      }
+      const t = (TYKKELSER.find((z) => z[0] === tk) || TYKKELSER[1])[1];
+      utkastRef.current = v === 'frihand'
+        ? { type: 'frihand', punkter: [[px, py]], farge: TEGNEFARGER[fn], tykkelse: t }
+        : { type: v, x1: px, y1: py, x2: px, y2: py, farge: TEGNEFARGER[fn], tykkelse: t };
+      visUtkast();
+    };
+    const flytt = (x, y) => {
+      const u = utkastRef.current;
+      if (!u) return;
+      const [px, py] = punkt(x, y);
+      if (u.type === 'frihand') {
+        const d = tilstand.current.dim;
+        const siste = u.punkter[u.punkter.length - 1];
+        if (Math.hypot(px - siste[0], py - siste[1]) > Math.max(d.bredde, d.hoyde) * 0.003) u.punkter.push([px, py]);
+      } else {
+        u.x2 = px;
+        u.y2 = py;
+      }
+      visUtkast();
+    };
+    const slutt = () => {
+      const u = utkastRef.current;
+      utkastRef.current = null;
+      if (!u) return;
+      const d = tilstand.current.dim;
+      const min = Math.max(d.bredde, d.hoyde) * 0.012;
+      const ok = u.type === 'frihand' ? u.punkter.length > 1 : Math.hypot(u.x2 - u.x1, u.y2 - u.y1) > min;
+      if (ok) setFigurer((f) => [...f, u]);
+      setUtkast(null);
+    };
+    // Berøring (iPhone): stopp rulling og zoom mens det tegnes
+    const tStart = (e) => { if (e.touches.length > 1) return; e.preventDefault(); const t = e.touches[0]; start(t.clientX, t.clientY); };
+    const tFlytt = (e) => { e.preventDefault(); const t = e.touches[0]; if (t) flytt(t.clientX, t.clientY); };
+    const tSlutt = (e) => { e.preventDefault(); slutt(); };
+    // Mus og penn
+    const pStart = (e) => { if (e.pointerType === 'touch') return; e.preventDefault(); el.setPointerCapture && el.setPointerCapture(e.pointerId); start(e.clientX, e.clientY); };
+    const pFlytt = (e) => { if (e.pointerType === 'touch') return; flytt(e.clientX, e.clientY); };
+    const pSlutt = (e) => { if (e.pointerType === 'touch') return; slutt(); };
+    const opt = { passive: false };
+    el.addEventListener('touchstart', tStart, opt);
+    el.addEventListener('touchmove', tFlytt, opt);
+    el.addEventListener('touchend', tSlutt, opt);
+    el.addEventListener('touchcancel', tSlutt, opt);
+    el.addEventListener('pointerdown', pStart);
+    el.addEventListener('pointermove', pFlytt);
+    el.addEventListener('pointerup', pSlutt);
+    el.addEventListener('pointercancel', pSlutt);
+    return () => {
+      el.removeEventListener('touchstart', tStart, opt);
+      el.removeEventListener('touchmove', tFlytt, opt);
+      el.removeEventListener('touchend', tSlutt, opt);
+      el.removeEventListener('touchcancel', tSlutt, opt);
+      el.removeEventListener('pointerdown', pStart);
+      el.removeEventListener('pointermove', pFlytt);
+      el.removeEventListener('pointerup', pSlutt);
+      el.removeEventListener('pointercancel', pSlutt);
+      if (ramme.current) cancelAnimationFrame(ramme.current);
+    };
+  }, [dim]);
+
+  // Hindre at siden bak ruller/zoomer mens tegnemodus er åpen
+  useEffect(() => {
+    const stopp = (e) => { if (e.target.closest && !e.target.closest('.tegne-verktoy, .tegne-tekst, .tegne-topp')) e.preventDefault(); };
+    document.addEventListener('touchmove', stopp, { passive: false });
+    document.addEventListener('gesturestart', stopp, { passive: false });
+    return () => {
+      document.removeEventListener('touchmove', stopp, { passive: false });
+      document.removeEventListener('gesturestart', stopp, { passive: false });
+    };
+  }, []);
+
   const leggTilTekst = () => {
-    if (tekst.trim()) setFigurer([...figurer, { type: 'tekst', x1: tekstPunkt[0], y1: tekstPunkt[1], tekst: tekst.trim(), farge: TEGNEFARGER[farge] }]);
+    const t = (TYKKELSER.find((z) => z[0] === tykkelse) || TYKKELSER[1])[1];
+    if (tekst.trim()) setFigurer([...figurer, { type: 'tekst', x1: tekstPunkt[0], y1: tekstPunkt[1], tekst: tekst.trim(), farge: TEGNEFARGER[farge], tykkelse: t }]);
     setTekstPunkt(null);
   };
   const lagre = async () => {
@@ -172,6 +265,12 @@ export function Tegnemodus({ foto, onLukk }) {
   };
 
   const A = lagBygger('app');
+  const hjelp = {
+    frihand: 'Tegn med fingeren.',
+    pil: 'Sett fingeren der pilen skal starte, og dra til spissen.',
+    sirkel: 'Dra diagonalt over området som skal rammes inn.',
+    tekst: 'Trykk der teksten skal stå.',
+  }[verktoy];
   return html`<div class="tegnemodus" role="dialog" aria-modal="true">
     <div class="tegne-topp">
       <button class="knapp flat" onClick=${avbryt}>Avbryt</button>
@@ -180,11 +279,9 @@ export function Tegnemodus({ foto, onLukk }) {
     </div>
     <div class="tegne-flate">
       <div class="tegne-ramme">
-        ${url && html`<img src=${url} alt="" onLoad=${(e) => !dim && setDim({ bredde: e.target.naturalWidth, hoyde: e.target.naturalHeight })} />`}
-        ${dim && h('svg', {
-          ref: svgRef, class: 'tegne-svg', viewBox: `0 0 ${dim.bredde} ${dim.hoyde}`, preserveAspectRatio: 'none',
-          onPointerDown: ned, onPointerMove: flytt, onPointerUp: opp, onPointerCancel: opp,
-        }, figurerSvg(A, { ...dim, figurer }, utkast))}
+        ${url && html`<img src=${url} alt="" draggable="false" onLoad=${(e) => !dim && setDim({ bredde: e.target.naturalWidth, hoyde: e.target.naturalHeight })} />`}
+        ${dim && h('svg', { ref: svgRef, class: 'tegne-svg', viewBox: `0 0 ${dim.bredde} ${dim.hoyde}`, preserveAspectRatio: 'none' },
+          figurerSvg(A, { ...dim, figurer }, utkast))}
       </div>
     </div>
     ${tekstPunkt && html`<div class="tegne-tekst">
@@ -201,11 +298,14 @@ export function Tegnemodus({ foto, onLukk }) {
         ${Object.entries(TEGNEFARGER).map(([n, c]) => html`<button class=${'chip farge-chip' + (farge === n ? ' valgt' : '')} onClick=${() => setFarge(n)}
           aria-label=${n}><span class="fargeprikk" style=${`background:${c}`}></span>${n}</button>`)}
       </div>
+      <div class="chips kompakt">
+        ${TYKKELSER.map(([n]) => html`<button class=${'chip' + (tykkelse === n ? ' valgt' : '')} onClick=${() => setTykkelse(n)}>${n}</button>`)}
+      </div>
       <div class="knapperad">
         <button class="knapp" disabled=${!figurer.length} onClick=${() => setFigurer(figurer.slice(0, -1))}>↶ Angre</button>
         <button class="knapp fare-tekst" disabled=${!figurer.length} onClick=${tom}>Tøm</button>
       </div>
-      <p class="hjelp">${verktoy === 'tekst' ? 'Trykk der teksten skal stå.' : 'Dra med fingeren for å tegne.'} Originalbildet endres ikke.</p>
+      <p class="hjelp">${hjelp} Originalbildet endres ikke.</p>
     </div>
   </div>`;
 }
