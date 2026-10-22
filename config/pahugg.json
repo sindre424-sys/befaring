@@ -5,38 +5,126 @@
   "ikon": "pahugg",
   "aktiv": true,
   "rekkefolge": 2,
-  "profil": { "fra": true, "til": false, "fraNavn": "Profil", "tilNavn": "Profil til" },
+  "profil": {
+    "fra": true,
+    "til": false,
+    "fraNavn": "Profil",
+    "tilNavn": "Profil til"
+  },
   "stedsfelt": [
     {
       "id": "del",
       "navn": "Del av påhugget",
       "type": "valg",
-      "valg": ["Forskjæring", "Påhuggsflate", "Portal/forlengelse", "Første 20 m inn", "Annet"]
+      "valg": [
+        "Forskjæring",
+        "Påhuggsflate",
+        "Portal/forlengelse",
+        "Første 20 m inn",
+        "Annet"
+      ]
     }
   ],
   "posisjoner": [
-    "Påhuggsflate/front", "Heng over påhugg", "Vederlag venstre", "Vederlag høyre",
-    "Terreng over påhugg", "Portal/forlengelse"
+    "Påhuggsflate/front",
+    "Heng over påhugg",
+    "Vederlag venstre",
+    "Vederlag høyre",
+    "Terreng over påhugg",
+    "Portal/forlengelse"
   ],
+  "posisjonsskisse": {
+    "type": "pahugg-front",
+    "soner": {
+      "terreng": "Terreng over påhugg",
+      "heng": "Heng over påhugg",
+      "vederlagV": "Vederlag venstre",
+      "vederlagH": "Vederlag høyre",
+      "front": "Påhuggsflate/front",
+      "portal": "Portal/forlengelse"
+    }
+  },
   "observasjonstyper": [
-    "Tynn bergoverdekning", "Løsmasser over påhugg", "Sprekker parallelt med front",
-    "Løse blokker over påhugg", "Vann/is/istapper", "Kontroll av sikring", "Avvik", "Annet"
+    "Tynn bergoverdekning",
+    "Løsmasser over påhugg",
+    "Sprekker parallelt med front",
+    "Løse blokker over påhugg",
+    "Vann/is/istapper",
+    "Kontroll av sikring",
+    "Avvik",
+    "Annet"
   ],
   "status": [
-    "Rensk utført", "Forbolting/spiling utført", "Bolting utført", "Sprøytebetong utført",
-    "Sprøytebetongbuer utført", "Nett utført", "Portal/forlengelse etablert",
-    "Kontrollert sikring", "Annet"
+    "Rensk utført",
+    "Forbolting/spiling utført",
+    "Bolting utført",
+    "Sprøytebetong utført",
+    "Sprøytebetongbuer utført",
+    "Nett utført",
+    "Portal/forlengelse etablert",
+    "Kontrollert sikring",
+    "Annet"
   ],
   "maletyper": [
-    { "navn": "Bergoverdekning", "enhet": "m", "gruppe": "Overdekning", "min": 0, "max": 200 },
-    { "navn": "Løsmassetykkelse", "enhet": "m", "gruppe": "Overdekning", "min": 0, "max": 50 },
-    { "navn": "Spilingslengde", "enhet": "m", "gruppe": "Sikring", "min": 0, "max": 20 },
-    { "navn": "Antall spiler", "enhet": "stk", "gruppe": "Sikring", "min": 0, "max": 500, "heltall": true },
-    { "navn": "Buesenteravstand", "enhet": "m", "gruppe": "Sikring", "min": 0, "max": 10 },
-    { "navn": "Sprøytebetongtykkelse", "enhet": "cm", "gruppe": "Sikring", "min": 0, "max": 50 },
-    { "navn": "Vannlekkasje", "enhet": "l/min", "gruppe": "Vann", "min": 0, "max": 1000 },
-    { "navn": "Annet", "enhet": "", "gruppe": "Annet" }
+    {
+      "navn": "Bergoverdekning",
+      "enhet": "m",
+      "gruppe": "Overdekning",
+      "min": 0,
+      "max": 200
+    },
+    {
+      "navn": "Løsmassetykkelse",
+      "enhet": "m",
+      "gruppe": "Overdekning",
+      "min": 0,
+      "max": 50
+    },
+    {
+      "navn": "Spilingslengde",
+      "enhet": "m",
+      "gruppe": "Sikring",
+      "min": 0,
+      "max": 20
+    },
+    {
+      "navn": "Antall spiler",
+      "enhet": "stk",
+      "gruppe": "Sikring",
+      "min": 0,
+      "max": 500,
+      "heltall": true
+    },
+    {
+      "navn": "Buesenteravstand",
+      "enhet": "m",
+      "gruppe": "Sikring",
+      "min": 0,
+      "max": 10
+    },
+    {
+      "navn": "Sprøytebetongtykkelse",
+      "enhet": "cm",
+      "gruppe": "Sikring",
+      "min": 0,
+      "max": 50
+    },
+    {
+      "navn": "Vannlekkasje",
+      "enhet": "l/min",
+      "gruppe": "Vann",
+      "min": 0,
+      "max": 1000
+    },
+    {
+      "navn": "Annet",
+      "enhet": "",
+      "gruppe": "Annet"
+    }
   ],
   "geometri": null,
-  "skisser": ["pahugg-front", "pahugg-lengdesnitt"]
+  "skisser": [
+    "pahugg-front",
+    "pahugg-lengdesnitt"
+  ]
 }

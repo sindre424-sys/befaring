@@ -1,6 +1,6 @@
 // Service worker: lagrer hele appen lokalt slik at den virker 100 % uten nett.
 // VIKTIG: Øk VERSJON ved hver endring, ellers får ikke telefonen den nye versjonen.
-const VERSJON = '0.3.0';
+const VERSJON = '0.4.0';
 const CACHE = 'befaring-' + VERSJON;
 
 const FILER = [
@@ -46,6 +46,15 @@ const FILER = [
   'js/eksport/pdf.js',
   'js/eksport/dips.js',
   'js/eksport/del.js',
+  'js/skisser/svg.js',
+  'js/skisser/data.js',
+  'js/skisser/profilstripe.js',
+  'js/skisser/kompass.js',
+  'js/skisser/tunnel.js',
+  'js/skisser/skjaering.js',
+  'js/skisser/pahugg.js',
+  'js/skisser/stereonett.js',
+  'js/skisser/komponenter.js',
   'js/views/start.js',
   'js/views/ny-befaring.js',
   'js/views/befaring.js',

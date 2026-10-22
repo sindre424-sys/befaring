@@ -1,6 +1,6 @@
 // PDF-eksport: samme innhold og oppsett som Word-notatet (samme rapportmodell).
 import { lastPdfmake } from './last.js';
-import { grunnFilnavn, bildeForRapport, figurMal, ALV_FARGE } from './data.js';
+import { grunnFilnavn, figurBilde, figurMal, ALV_FARGE } from './data.js';
 import { innledningTekst } from './tekster.js';
 
 const tilDataUrl = (blob) => new Promise((res, rej) => {
@@ -36,8 +36,11 @@ export async function lagPdf(data, modell, { medBilder = true, bildeMaks = 1280,
 
   // Sidebredde A4 (595 pt) minus marger (2 × 70 pt) = 455 pt
   const figur = async (fig) => {
-    const bilde = await bildeForRapport(fig.foto.blob, bildeMaks);
-    const mal = figurMal(bilde.bredde || 4, bilde.hoyde || 3, 440, 330);
+    const bilde = await figurBilde(fig, bildeMaks);
+    // skisser: 1 px i skissen ≈ 0,78 pt, maks sidebredde
+    const mal = bilde.maksBredde
+      ? figurMal(bilde.bredde, bilde.hoyde, Math.min(440, bilde.maksBredde * 0.78), 400)
+      : figurMal(bilde.bredde || 4, bilde.hoyde || 3, 440, 330);
     return {
       unbreakable: true,
       stack: [
@@ -65,6 +68,7 @@ export async function lagPdf(data, modell, { medBilder = true, bildeMaks = 1280,
     innhold.push({ text: `${kap} ${s.tittel}`, style: 'h1', headlineLevel: 1 });
     if (!s.observasjoner.length) innhold.push({ text: 'Ingen observasjoner registrert.' });
     for (const fig of s.oversiktFigurer) innhold.push(await figur(fig));
+    for (const t of s.oversiktTekst || []) innhold.push({ text: t, italics: t.startsWith('Kinematisk feltindikator –'), margin: [0, 0, 0, 4] });
     for (const x of s.observasjoner) {
       const blokk = [{ text: x.overskrift, style: 'h2' }];
       for (const [k, v] of x.felter) blokk.push({ text: [{ text: k + ': ', bold: true }, v || ''], margin: [0, 0, 0, 1] });
@@ -74,9 +78,10 @@ export async function lagPdf(data, modell, { medBilder = true, bildeMaks = 1280,
       if (x.malinger.length) innhold.push(undertittel('Målinger'), tabell(['Måletype', 'Verdi', 'Enhet', 'Kommentar'], x.malinger, [130, 50, 40, '*']));
       if (x.sett.length) {
         innhold.push(undertittel('Sprekkesett'), tabell(['Navn', 'Fall/fallretning', 'Strøk/fall', 'Avstand', 'Utholdenhet', 'Ruhet/fylling', 'Kommentar'],
-          x.sett, [58, 52, 44, 36, 46, 70, '*']));
+          x.sett, [58, 50, 42, 36, 56, 64, '*']));
       }
       for (const fig of x.skisser) innhold.push(await figur(fig));
+      if (x.kinematikk && x.kinematikk.length) innhold.push(undertittel('Kinematisk feltindikator'), ...x.kinematikk.map((l) => ({ text: l, margin: [0, 0, 0, 1] })));
       innhold.push({
         margin: [0, 6, 0, 2],
         text: [

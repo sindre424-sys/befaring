@@ -5,6 +5,23 @@ import { hentConfig } from '../config.js';
 import { profilTekst, obsNr, fmtDato, fmtDatoTid, fmtNum, ALVORLIGHET, norm360, pad2 } from '../util.js';
 import { stedForFoto } from '../bilder.js';
 import { fallretningTilStrok, fmtRetning, fmtFall } from '../logikk.js';
+import { lagBygger, tilSvgTekst, RAPPORT_FARGER } from '../skisser/svg.js';
+import { tegnProfilstripe } from '../skisser/profilstripe.js';
+import { tegnTunnel } from '../skisser/tunnel.js';
+import { tegnSkjaeringSnitt, tegnSkjaeringFasade } from '../skisser/skjaering.js';
+import { tegnPahuggFront, tegnPahuggLengdesnitt, pahuggData, harLengdesnittData } from '../skisser/pahugg.js';
+import { tegnStereonett, kinematikkTekst, ANSVARSTEKST } from '../skisser/stereonett.js';
+import { analyseForObs, samletPerSide, posisjonsOversikt } from '../skisser/data.js';
+
+const R = lagBygger('rapport');
+const RF = RAPPORT_FARGER;
+/** Gjør en skisse om til en figur i notatet (SVG-tekst med størrelse). */
+function skisseFigur(node, maksBredde) {
+  const svg = tilSvgTekst(node);
+  const b = Number((svg.match(/ width="([\d.]+)"/) || [])[1]) || 340;
+  const h = Number((svg.match(/ height="([\d.]+)"/) || [])[1]) || 240;
+  return { svg, bredde: b, hoyde: h, maksBredde };
+}
 
 const aktive = (l) => l.filter((x) => !x.slettet);
 const etterTid = (a, b) => (a.created || 0) - (b.created || 0);
@@ -69,17 +86,61 @@ export function typerIRekkefolge(data) {
   return [...ider].sort((x, y) => (typeFor(data.config, x).rekkefolge ?? 99) - (typeFor(data.config, y).rekkefolge ?? 99));
 }
 
-/** Bygger rapportmodellen. Figurer nummereres fortløpende i den rekkefølgen de står i notatet. */
-export function byggModell(data) {
+/** Bygger rapportmodellen. Figurer nummereres fortløpende i den rekkefølgen de står i notatet.
+ *  valg.skisser: ta med skisser og stereonett. valg.posisjonsskisser: posisjonsskisse per observasjon. */
+export function byggModell(data, valg = {}) {
   const { b, p, obs, malinger, sett, fotos, config, inn } = data;
+  const medSkisser = valg.skisser !== false;
+  const medPosisjon = !!valg.posisjonsskisser;
   let figNr = 0;
+  const nyFigur = (fig, tekst) => ({ ...fig, nr: ++figNr, tekst: `Figur ${figNr}: ${tekst}` });
   const figurFor = {}; // foto-id → figurnummer (brukes også i Excel og bilde-zip)
   const seksjoner = [];
 
   for (const typeId of typerIRekkefolge(data)) {
     const t = typeFor(config, typeId);
     const liste = obs.filter((o) => o.objekttype === typeId);
-    const seksjon = { typeId, tittel: t.navn, oversiktFigurer: [], observasjoner: [] };
+    const seksjon = { typeId, tittel: t.navn, oversiktFigurer: [], oversiktTekst: [], observasjoner: [] };
+    const skisser = t.skisser || [];
+    const ps = t.posisjonsskisse || {};
+    const erSkjaering = skisser.includes('stereonett');
+    if (medSkisser && liste.length) {
+      seksjon.oversiktFigurer.push(nyFigur(skisseFigur(tegnProfilstripe(R, RF, { rader: [{ navn: t.kortnavn || t.navn, obs: liste }], bredde: 560 }), 560),
+        `Profilstripe – ${t.navn.toLowerCase()}. Observasjonene er farget etter alvorlighet.`));
+      if (skisser.includes('skjaering-fasade')) {
+        for (const side of ['Venstre', 'Høyre']) {
+          const pa = liste.filter((o) => o.sted && o.sted.side === side);
+          if (pa.length) seksjon.oversiktFigurer.push(nyFigur(skisseFigur(tegnSkjaeringFasade(R, RF, { obs: pa, side, soner: ps.soner, bredde: 520 }), 520),
+            `Oppriss av skjæringen, ${side.toLowerCase()} side, med observasjonene plottet der de ble registrert.`));
+        }
+      }
+      if (erSkjaering) {
+        for (const s of samletPerSide(liste, sett, inn)) {
+          seksjon.oversiktFigurer.push(nyFigur(skisseFigur(tegnStereonett(R, RF, { sett: s.sprekker, flate: s.flate, analyse: s.analyse, medForklaring: true, tittel: `Samlet – ${s.side.toLowerCase()} side`, bredde: 340 }), 340),
+            `Samlet stereonett (likeareal, nedre halvkule), ${s.side.toLowerCase()} side.`));
+          if (s.analyse) {
+            seksjon.oversiktTekst.push(`Kinematisk feltindikator, ${s.side.toLowerCase()} side (φ = ${s.analyse.phi}°, ±${s.analyse.lat}°): `
+              + kinematikkTekst(s.analyse).map((l) => l.full).join('; ') + '.');
+          }
+        }
+        if (seksjon.oversiktTekst.length) seksjon.oversiktTekst.push(ANSVARSTEKST);
+      }
+      if (ps.type === 'tunnel-tverrsnitt' && skisser.includes('tunnel-tverrsnitt')) {
+        seksjon.oversiktFigurer.push(nyFigur(skisseFigur(tegnTunnel(R, RF, { oversikt: posisjonsOversikt(liste), soner: ps.soner, bredde: 300 }), 300),
+          'Tverrsnitt med antall observasjoner per posisjon, farget etter verste alvorlighet.'));
+      }
+      if (ps.type === 'pahugg-front' && skisser.includes('pahugg-front')) {
+        seksjon.oversiktFigurer.push(nyFigur(skisseFigur(tegnPahuggFront(R, RF, { oversikt: posisjonsOversikt(liste), soner: ps.soner, bredde: 300 }), 300),
+          'Påhuggsflaten sett forfra med antall observasjoner per posisjon, farget etter verste alvorlighet.'));
+      }
+      if (skisser.includes('pahugg-lengdesnitt')) {
+        const d = pahuggData(liste, malinger);
+        if (harLengdesnittData(d)) {
+          seksjon.oversiktFigurer.push(nyFigur(skisseFigur(tegnPahuggLengdesnitt(R, RF, { data: d, bredde: 480 }), 480),
+            'Skjematisk lengdesnitt ved påhugget med bergoverdekning, løsmassetykkelse, spiling og buer fra registrerte målinger.'));
+        }
+      }
+    }
     for (const o of liste) {
       const felter = [['Registrert', fmtDatoTid(o.tid)]];
       if (o.omrade) felter.push(['Område', o.omrade]);
@@ -111,6 +172,34 @@ export function byggModell(data) {
           s.kommentar || '',
         ];
       });
+      const skisseFigurer = [];
+      let kinematikk = [];
+      if (medSkisser) {
+        const prof = profilTekst(o.profilFra, o.profilTil);
+        const g = o.geometri || {};
+        if (ps.type === 'skjaering-snitt' && ['hoyde', 'helning', 'groftbredde', 'losmasse'].some((k) => g[k] !== null && g[k] !== undefined && g[k] !== '')) {
+          const side = (o.sted && o.sted.side) || 'Høyre';
+          skisseFigurer.push(nyFigur(skisseFigur(tegnSkjaeringSnitt(R, RF, { geometri: g, side, valgte: o.posisjon || [], soner: ps.soner, bredde: 340 }), 340),
+            `Skjæringssnitt, ${prof.toLowerCase()}, ${side.toLowerCase()} side${o.posisjon && o.posisjon.length ? ' – ' + o.posisjon.join(', ').toLowerCase() : ''}.`));
+        } else if (medPosisjon && o.posisjon && o.posisjon.length && (ps.type === 'tunnel-tverrsnitt' || ps.type === 'pahugg-front')) {
+          const tegn = ps.type === 'tunnel-tverrsnitt' ? tegnTunnel : tegnPahuggFront;
+          skisseFigurer.push(nyFigur(skisseFigur(tegn(R, RF, { valgte: o.posisjon, soner: ps.soner, bredde: 300 }), 260),
+            `Posisjon, ${prof.toLowerCase()} – ${o.posisjon.join(', ').toLowerCase()}.`));
+        }
+        const an = analyseForObs(o, sett[o.id], inn, erSkjaering);
+        if (an.sprekker.length || an.flate) {
+          skisseFigurer.push(nyFigur(skisseFigur(tegnStereonett(R, RF, { sett: an.sprekker, flate: an.flate, analyse: an.analyse, medForklaring: true, bredde: 300 }), 300),
+            `Stereonett (likeareal, nedre halvkule), observasjon ${obsNr(o.lopenr)}.`));
+        }
+        if (an.analyse) kinematikk = [...kinematikkTekst(an.analyse).map((l) => l.full), `φ = ${an.analyse.phi}°, sideavgrensning ±${an.analyse.lat}°. ${ANSVARSTEKST}`];
+        if (skisser.includes('pahugg-lengdesnitt')) {
+          const d = pahuggData([o], { [o.id]: malinger[o.id] || [] });
+          if (harLengdesnittData(d)) {
+            skisseFigurer.push(nyFigur(skisseFigur(tegnPahuggLengdesnitt(R, RF, { data: d, bredde: 420 }), 420),
+              `Skjematisk lengdesnitt, observasjon ${obsNr(o.lopenr)}.`));
+          }
+        }
+      }
       const figurer = (fotos[o.id] || []).map((f) => {
         const nr = ++figNr;
         figurFor[f.id] = nr;
@@ -119,7 +208,7 @@ export function byggModell(data) {
       });
       seksjon.observasjoner.push({
         o, t, overskrift: obsOverskrift(o, t), felter, tekst: o.tekst || '', geometri, malinger: mal, sett: settRader,
-        skisser: [], // fase 4: skisser og stereonett
+        skisser: skisseFigurer, kinematikk,
         vurdering: o.vurdering || '', alvorlighet: o.alvorlighet || null, tiltak: o.tiltak || '', figurer,
       });
     }
@@ -198,6 +287,17 @@ export async function bildeForRapport(blob, maks) {
   } finally {
     URL.revokeObjectURL(url);
   }
+}
+
+/** Bilde eller skisse → { blob, bredde, hoyde, type } klar for Word/PDF. */
+export async function figurBilde(fig, bildeMaks) {
+  if (fig.svg) {
+    const { svgTilPng } = await import('../skisser/svg.js');
+    const blob = await svgTilPng(fig.svg, fig.bredde, fig.hoyde, 3);
+    return { blob, bredde: fig.bredde, hoyde: fig.hoyde, type: 'png', maksBredde: fig.maksBredde };
+  }
+  const b = await bildeForRapport(fig.foto.blob, bildeMaks);
+  return { ...b, type: 'jpg', maksBredde: null };
 }
 
 /** Bildestørrelse i notatet: tilpasset sidebredden, men ikke for høye stående bilder. */

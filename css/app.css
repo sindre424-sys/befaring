@@ -368,3 +368,22 @@ input[type='datetime-local'] { min-width: 0; max-width: 100%; display: block; }
 .eksport-ikon { font-size: 2rem; line-height: 1; }
 .fil-linje { font-size: 0.92rem; overflow-wrap: anywhere; margin: 4px 0; }
 .blokk-lenke { display: block; text-decoration: none; }
+
+/* ---------- Skisser ---------- */
+:root { --berg: #c9ced4; --berg-kant: #7b848c; --losmasse: #e6d3a3; --vei: #4d5359; --sone: #dfe7ef; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema='lys']) { --berg: #4a525a; --berg-kant: #8996a2; --losmasse: #7a6a43; --vei: #a7b1bb; --sone: #2c3a47; }
+}
+:root[data-tema='mork'] { --berg: #4a525a; --berg-kant: #8996a2; --losmasse: #7a6a43; --vei: #a7b1bb; --sone: #2c3a47; }
+.skisse-boks { margin: 10px 0; }
+.skisse-boks h3 { margin: 4px 0 6px; }
+.skisse { display: block; width: 100%; height: auto; max-width: 520px; margin: 0 auto; border-radius: 10px; border: 1px solid var(--kant); touch-action: manipulation; -webkit-user-select: none; user-select: none; }
+.skisse text { -webkit-user-select: none; user-select: none; }
+.kompass { flex: none; }
+.orientering-rad { display: flex; gap: 12px; align-items: center; margin: -2px 0 10px; }
+.orientering-rad .orientering-sammendrag { margin: 0; }
+.rad-kort.sammendrag { grid-template-columns: auto auto auto 1fr auto; }
+.sett-kompass { display: flex; }
+.trafikklys { list-style: none; padding: 0; margin: 8px 0; }
+.trafikklys li { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 0.95rem; }
+.trafikklys .prikk { width: 16px; height: 16px; }

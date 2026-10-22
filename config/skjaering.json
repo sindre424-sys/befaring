@@ -5,60 +5,246 @@
   "ikon": "skjaering",
   "aktiv": true,
   "rekkefolge": 1,
-  "profil": { "fra": true, "til": true, "fraNavn": "Profil fra", "tilNavn": "Profil til" },
+  "profil": {
+    "fra": true,
+    "til": true,
+    "fraNavn": "Profil fra",
+    "tilNavn": "Profil til"
+  },
   "stedsfelt": [
     {
       "id": "side",
       "navn": "Side",
       "type": "valg",
-      "valg": ["Venstre", "Høyre"],
+      "valg": [
+        "Venstre",
+        "Høyre"
+      ],
       "hjelp": "Sett i stigende profilretning"
     },
-    { "id": "pall", "navn": "Pall/nivå", "type": "heltall", "min": 1, "max": 20 }
+    {
+      "id": "pall",
+      "navn": "Pall/nivå",
+      "type": "heltall",
+      "min": 1,
+      "max": 20
+    }
   ],
   "posisjoner": [
-    "Terreng/bakkant", "Løsmasseskråning", "Overgang løsmasse/berg",
-    "Skjæringsflate øvre del", "Skjæringsflate nedre del", "Pallkant/hylle",
-    "Skjæringsfot", "Grøft/fanggrøft"
+    "Terreng/bakkant",
+    "Løsmasseskråning",
+    "Overgang løsmasse/berg",
+    "Skjæringsflate øvre del",
+    "Skjæringsflate nedre del",
+    "Pallkant/hylle",
+    "Skjæringsfot",
+    "Grøft/fanggrøft"
   ],
+  "posisjonsskisse": {
+    "type": "skjaering-snitt",
+    "soner": {
+      "terreng": "Terreng/bakkant",
+      "losmasseskraning": "Løsmasseskråning",
+      "overgang": "Overgang løsmasse/berg",
+      "ovre": "Skjæringsflate øvre del",
+      "nedre": "Skjæringsflate nedre del",
+      "pallkant": "Pallkant/hylle",
+      "fot": "Skjæringsfot",
+      "groft": "Grøft/fanggrøft"
+    }
+  },
   "observasjonstyper": [
-    "Plan utglidning", "Kileutglidning", "Utvelting (toppling)", "Løse blokker",
-    "Steinsprang/nedfall i grøft", "Overheng", "Sprekker parallelt med skjæringsflaten",
-    "Forvitring/oppsprukket berg", "Sprengningsskader/bakbrytning", "Vann/is",
-    "Løsmasser/erosjon i topp", "Kontroll av sikring", "Avvik", "Annet"
+    "Plan utglidning",
+    "Kileutglidning",
+    "Utvelting (toppling)",
+    "Løse blokker",
+    "Steinsprang/nedfall i grøft",
+    "Overheng",
+    "Sprekker parallelt med skjæringsflaten",
+    "Forvitring/oppsprukket berg",
+    "Sprengningsskader/bakbrytning",
+    "Vann/is",
+    "Løsmasser/erosjon i topp",
+    "Kontroll av sikring",
+    "Avvik",
+    "Annet"
   ],
   "status": [
-    "Maskinrensk utført", "Spettrensk utført", "Bolting utført", "Nett/rasnett montert",
-    "Sprøytebetong utført", "Fanggrøft rensket", "Fangvoll/gjerde etablert",
-    "Drenering etablert", "Kontrollert sikring", "Annet"
+    "Maskinrensk utført",
+    "Spettrensk utført",
+    "Bolting utført",
+    "Nett/rasnett montert",
+    "Sprøytebetong utført",
+    "Fanggrøft rensket",
+    "Fangvoll/gjerde etablert",
+    "Drenering etablert",
+    "Kontrollert sikring",
+    "Annet"
   ],
   "maletyper": [
-    { "navn": "Skjæringshøyde", "enhet": "m", "gruppe": "Skjæringsgeometri", "min": 0, "max": 200 },
-    { "navn": "Skjæringshelning", "enhet": "°", "gruppe": "Skjæringsgeometri", "min": 0, "max": 90 },
-    { "navn": "Pallbredde", "enhet": "m", "gruppe": "Skjæringsgeometri", "min": 0, "max": 50 },
-    { "navn": "Overheng", "enhet": "m", "gruppe": "Skjæringsgeometri", "min": 0, "max": 20 },
-    { "navn": "Grøftbredde", "enhet": "m", "gruppe": "Grøft og topp", "min": 0, "max": 30 },
-    { "navn": "Grøftdybde", "enhet": "m", "gruppe": "Grøft og topp", "min": 0, "max": 10 },
-    { "navn": "Løsmassetykkelse i topp", "enhet": "m", "gruppe": "Grøft og topp", "min": 0, "max": 50 },
-    { "navn": "Avstand bakkant–skjæringstopp", "enhet": "m", "gruppe": "Grøft og topp", "min": 0, "max": 100 },
-    { "navn": "Blokkstørrelse", "enhet": "m³", "gruppe": "Blokker og nedfall", "min": 0, "max": 100 },
-    { "navn": "Mengde nedfall i grøft", "enhet": "m³", "gruppe": "Blokker og nedfall", "min": 0, "max": 1000 },
-    { "navn": "Sprekkåpning", "enhet": "mm", "gruppe": "Sprekker og sikring", "min": 0, "max": 500 },
-    { "navn": "Boltelengde", "enhet": "m", "gruppe": "Sprekker og sikring", "min": 0, "max": 15 },
-    { "navn": "Antall bolter", "enhet": "stk", "gruppe": "Sprekker og sikring", "min": 0, "max": 500, "heltall": true },
-    { "navn": "Avstand til påhugg", "enhet": "m", "gruppe": "Annet", "min": 0, "max": 5000 },
-    { "navn": "Annet", "enhet": "", "gruppe": "Annet" }
+    {
+      "navn": "Skjæringshøyde",
+      "enhet": "m",
+      "gruppe": "Skjæringsgeometri",
+      "min": 0,
+      "max": 200
+    },
+    {
+      "navn": "Skjæringshelning",
+      "enhet": "°",
+      "gruppe": "Skjæringsgeometri",
+      "min": 0,
+      "max": 90
+    },
+    {
+      "navn": "Pallbredde",
+      "enhet": "m",
+      "gruppe": "Skjæringsgeometri",
+      "min": 0,
+      "max": 50
+    },
+    {
+      "navn": "Overheng",
+      "enhet": "m",
+      "gruppe": "Skjæringsgeometri",
+      "min": 0,
+      "max": 20
+    },
+    {
+      "navn": "Grøftbredde",
+      "enhet": "m",
+      "gruppe": "Grøft og topp",
+      "min": 0,
+      "max": 30
+    },
+    {
+      "navn": "Grøftdybde",
+      "enhet": "m",
+      "gruppe": "Grøft og topp",
+      "min": 0,
+      "max": 10
+    },
+    {
+      "navn": "Løsmassetykkelse i topp",
+      "enhet": "m",
+      "gruppe": "Grøft og topp",
+      "min": 0,
+      "max": 50
+    },
+    {
+      "navn": "Avstand bakkant–skjæringstopp",
+      "enhet": "m",
+      "gruppe": "Grøft og topp",
+      "min": 0,
+      "max": 100
+    },
+    {
+      "navn": "Blokkstørrelse",
+      "enhet": "m³",
+      "gruppe": "Blokker og nedfall",
+      "min": 0,
+      "max": 100
+    },
+    {
+      "navn": "Mengde nedfall i grøft",
+      "enhet": "m³",
+      "gruppe": "Blokker og nedfall",
+      "min": 0,
+      "max": 1000
+    },
+    {
+      "navn": "Sprekkåpning",
+      "enhet": "mm",
+      "gruppe": "Sprekker og sikring",
+      "min": 0,
+      "max": 500
+    },
+    {
+      "navn": "Boltelengde",
+      "enhet": "m",
+      "gruppe": "Sprekker og sikring",
+      "min": 0,
+      "max": 15
+    },
+    {
+      "navn": "Antall bolter",
+      "enhet": "stk",
+      "gruppe": "Sprekker og sikring",
+      "min": 0,
+      "max": 500,
+      "heltall": true
+    },
+    {
+      "navn": "Avstand til påhugg",
+      "enhet": "m",
+      "gruppe": "Annet",
+      "min": 0,
+      "max": 5000
+    },
+    {
+      "navn": "Annet",
+      "enhet": "",
+      "gruppe": "Annet"
+    }
   ],
   "geometri": {
     "felt": [
-      { "id": "hoyde", "navn": "Skjæringshøyde", "enhet": "m", "min": 0, "max": 200 },
-      { "id": "helning", "navn": "Helning", "enhet": "°", "min": 0, "max": 90 },
-      { "id": "antallPaller", "navn": "Antall paller", "enhet": "stk", "min": 0, "max": 20, "heltall": true },
-      { "id": "pallbredde", "navn": "Pallbredde", "enhet": "m", "min": 0, "max": 50 },
-      { "id": "groftbredde", "navn": "Grøftbredde", "enhet": "m", "min": 0, "max": 30 },
-      { "id": "losmasse", "navn": "Løsmassetykkelse", "enhet": "m", "min": 0, "max": 50 },
-      { "id": "fallretning", "navn": "Skjæringsflatens fallretning", "enhet": "°", "min": 0, "max": 360, "heltall": true }
+      {
+        "id": "hoyde",
+        "navn": "Skjæringshøyde",
+        "enhet": "m",
+        "min": 0,
+        "max": 200
+      },
+      {
+        "id": "helning",
+        "navn": "Helning",
+        "enhet": "°",
+        "min": 0,
+        "max": 90
+      },
+      {
+        "id": "antallPaller",
+        "navn": "Antall paller",
+        "enhet": "stk",
+        "min": 0,
+        "max": 20,
+        "heltall": true
+      },
+      {
+        "id": "pallbredde",
+        "navn": "Pallbredde",
+        "enhet": "m",
+        "min": 0,
+        "max": 50
+      },
+      {
+        "id": "groftbredde",
+        "navn": "Grøftbredde",
+        "enhet": "m",
+        "min": 0,
+        "max": 30
+      },
+      {
+        "id": "losmasse",
+        "navn": "Løsmassetykkelse",
+        "enhet": "m",
+        "min": 0,
+        "max": 50
+      },
+      {
+        "id": "fallretning",
+        "navn": "Skjæringsflatens fallretning",
+        "enhet": "°",
+        "min": 0,
+        "max": 360,
+        "heltall": true
+      }
     ]
   },
-  "skisser": ["skjaering-snitt", "skjaering-fasade", "stereonett"]
+  "skisser": [
+    "skjaering-snitt",
+    "skjaering-fasade",
+    "stereonett"
+  ]
 }

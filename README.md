@@ -96,6 +96,26 @@ Første gang etter oppdateringen laster appen ned eksportmodulene (ca. 4 MB). Gj
   «Gjenopprett fra fil …» med sikkerhetskopien. Testdataene skal komme tilbake med bilder.
 - [ ] **Påminnelse:** Startsiden minner deg på sikkerhetskopi hvis du har egne befaringer og det er over 14 dager siden sist.
 
+## Teste fase 4 (visuelle hjelpemidler) på iPhone
+
+Ta en sikkerhetskopi før du oppdaterer (Innstillinger → Sikkerhetskopi). Oppdateringen endrer ikke lagrede data.
+
+- [ ] **Oppdater** til versjon 0.4.0.
+- [ ] **Profilstripe** øverst på befaringssiden: én rad per objekttype, farget etter alvorlighet. Trykk på en markør for å åpne observasjonen.
+- [ ] **«Vis skisser og stereonett»** på befaringssiden: oppriss av skjæringen per side, samlet stereonett per side med
+  trafikklys, tunneltverrsnitt og påhuggsfront med antall observasjoner per posisjon, og lengdesnitt ved påhugget.
+- [ ] **Posisjonsskisser:** I en observasjon velger du posisjon ved å trykke i skissen (tunnel: hesteskoprofil med «Stuff»
+  i midten, skjæring: snitt, påhugg: front). Sjekk at trykkflatene er store nok med hansker.
+- [ ] **Skjæringssnitt:** Endre høyde, helning, antall paller og side. Snittet skal tegnes om med en gang.
+- [ ] **Kompass:** Når du legger inn fall og fallretning, vises strøklinje og fallpil. Sjekk at retningen stemmer med det du målte.
+- [ ] **Stereonett per observasjon:** Under sprekkesettene. For skjæring vises kritiske soner og trafikklys
+  (plan utglidning, kile, utvelting). Bytt mellom «Alle / Plan / Kile / Utvelting».
+- [ ] **Friksjonsvinkel/sideavgrensning:** Endre i Innstillinger og se at analysen endrer seg.
+- [ ] **Lengdesnitt (påhugg):** Vises når observasjonen har målinger av bergoverdekning, løsmassetykkelse, spiling eller buer.
+- [ ] **Eksport:** Lag Word og PDF «Med skisser». Sjekk figurene og figurtekstene, og at kinematikk-oppsummeringen står i teksten.
+
+> Stereonettet er en **feltindikator** og erstatter ikke en fullstendig stabilitetsvurdering.
+
 > **Viktig før du bruker appen i felt:** Ta sikkerhetskopi jevnlig og lagre den utenfor telefonen (OneDrive/e-post).
 > Data som bare ligger på telefonen, forsvinner hvis telefonen blir borte.
 
@@ -110,6 +130,7 @@ Første gang etter oppdateringen laster appen ned eksportmodulene (ca. 4 MB). Gj
 | `js/bilder.js` | Komprimering og lagring av bilder |
 | `js/views/foto.js` | Bildedelen i observasjonen |
 | `js/eksport/` | Excel, Word, PDF og Dips. `data.js` bygger én felles rapportmodell for Word og PDF |
+| `js/skisser/` | Alle skisser (SVG): profilstripe, kompass, tunnel, skjæring (snitt/oppriss), påhugg (front/lengdesnitt) og stereonett med kinematikk. Samme kode tegner i appen og i Word/PDF |
 | `js/sikkerhetskopi.js` | Sikkerhetskopi til zip og gjenoppretting (slår sammen, sletter aldri) |
 | `js/testdata.js` | Fiktive testdata (også fiktive bilder) |
 | `sw.js` | Offline-støtte. Lista `FILER` må inneholde alle filer appen bruker |

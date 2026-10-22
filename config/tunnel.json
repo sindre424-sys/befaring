@@ -5,31 +5,121 @@
   "ikon": "tunnel",
   "aktiv": true,
   "rekkefolge": 3,
-  "profil": { "fra": true, "til": true, "fraNavn": "Profil fra", "tilNavn": "Profil til" },
+  "profil": {
+    "fra": true,
+    "til": true,
+    "fraNavn": "Profil fra",
+    "tilNavn": "Profil til"
+  },
   "stedsfelt": [],
   "posisjoner": [
-    "Stuff", "Heng", "Vederlag venstre", "Vederlag høyre",
-    "Vegg venstre", "Vegg høyre", "Såle"
+    "Stuff",
+    "Heng",
+    "Vederlag venstre",
+    "Vederlag høyre",
+    "Vegg venstre",
+    "Vegg høyre",
+    "Såle"
   ],
+  "posisjonsskisse": {
+    "type": "tunnel-tverrsnitt",
+    "soner": {
+      "heng": "Heng",
+      "vederlagV": "Vederlag venstre",
+      "vederlagH": "Vederlag høyre",
+      "veggV": "Vegg venstre",
+      "veggH": "Vegg høyre",
+      "saale": "Såle",
+      "stuff": "Stuff"
+    }
+  },
   "observasjonstyper": [
-    "Bergmasse generelt", "Sprekk/sprekkesett", "Svakhetssone/leire",
-    "Vann/lekkasje", "Løse blokker/utfall", "Kontroll av sikring", "Avvik", "Annet"
+    "Bergmasse generelt",
+    "Sprekk/sprekkesett",
+    "Svakhetssone/leire",
+    "Vann/lekkasje",
+    "Løse blokker/utfall",
+    "Kontroll av sikring",
+    "Avvik",
+    "Annet"
   ],
   "status": [
-    "Rensk utført", "Spettrensk utført", "Spylerensk utført", "Boring pågår",
-    "Bolting utført", "Sprøytebetong utført", "Nett utført", "Kontrollert sikring", "Annet"
+    "Rensk utført",
+    "Spettrensk utført",
+    "Spylerensk utført",
+    "Boring pågår",
+    "Bolting utført",
+    "Sprøytebetong utført",
+    "Nett utført",
+    "Kontrollert sikring",
+    "Annet"
   ],
   "maletyper": [
-    { "navn": "Sprekkåpning", "enhet": "mm", "gruppe": "Sprekker", "min": 0, "max": 500 },
-    { "navn": "Sprekkavstand", "enhet": "cm", "gruppe": "Sprekker", "min": 0, "max": 1000 },
-    { "navn": "Boltelengde", "enhet": "m", "gruppe": "Sikring", "min": 0, "max": 15 },
-    { "navn": "Antall bolter", "enhet": "stk", "gruppe": "Sikring", "min": 0, "max": 500, "heltall": true },
-    { "navn": "Sprøytebetongtykkelse", "enhet": "cm", "gruppe": "Sikring", "min": 0, "max": 50 },
-    { "navn": "Vannlekkasje", "enhet": "l/min", "gruppe": "Vann", "min": 0, "max": 1000 },
-    { "navn": "Blokkstørrelse", "enhet": "m³", "gruppe": "Blokker", "min": 0, "max": 100 },
-    { "navn": "Overdekning", "enhet": "m", "gruppe": "Blokker", "min": 0, "max": 2000 },
-    { "navn": "Annet", "enhet": "", "gruppe": "Annet" }
+    {
+      "navn": "Sprekkåpning",
+      "enhet": "mm",
+      "gruppe": "Sprekker",
+      "min": 0,
+      "max": 500
+    },
+    {
+      "navn": "Sprekkavstand",
+      "enhet": "cm",
+      "gruppe": "Sprekker",
+      "min": 0,
+      "max": 1000
+    },
+    {
+      "navn": "Boltelengde",
+      "enhet": "m",
+      "gruppe": "Sikring",
+      "min": 0,
+      "max": 15
+    },
+    {
+      "navn": "Antall bolter",
+      "enhet": "stk",
+      "gruppe": "Sikring",
+      "min": 0,
+      "max": 500,
+      "heltall": true
+    },
+    {
+      "navn": "Sprøytebetongtykkelse",
+      "enhet": "cm",
+      "gruppe": "Sikring",
+      "min": 0,
+      "max": 50
+    },
+    {
+      "navn": "Vannlekkasje",
+      "enhet": "l/min",
+      "gruppe": "Vann",
+      "min": 0,
+      "max": 1000
+    },
+    {
+      "navn": "Blokkstørrelse",
+      "enhet": "m³",
+      "gruppe": "Blokker",
+      "min": 0,
+      "max": 100
+    },
+    {
+      "navn": "Overdekning",
+      "enhet": "m",
+      "gruppe": "Blokker",
+      "min": 0,
+      "max": 2000
+    },
+    {
+      "navn": "Annet",
+      "enhet": "",
+      "gruppe": "Annet"
+    }
   ],
   "geometri": null,
-  "skisser": ["tunnel-tverrsnitt"]
+  "skisser": [
+    "tunnel-tverrsnitt"
+  ]
 }

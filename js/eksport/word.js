@@ -1,6 +1,6 @@
 // Word-eksport (.docx): redigerbart befaringsnotat bygget fra rapportmodellen.
 import { lastDocx } from './last.js';
-import { grunnFilnavn, bildeForRapport, figurMal, ALV_FARGE } from './data.js';
+import { grunnFilnavn, figurBilde, figurMal, ALV_FARGE } from './data.js';
 import { innledningTekst } from './tekster.js';
 
 const DOCX_TYPE = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
@@ -46,14 +46,14 @@ export async function lagWord(data, modell, { medBilder = true, bildeMaks = 1280
   const luft = () => new Paragraph({ children: [], spacing: { after: 80 } });
 
   const figur = async (fig) => {
-    const bilde = await bildeForRapport(fig.foto.blob, bildeMaks);
-    const mal = figurMal(bilde.bredde || 4, bilde.hoyde || 3, 560, 420);
+    const bilde = await figurBilde(fig, bildeMaks);
+    const mal = figurMal(bilde.bredde || 4, bilde.hoyde || 3, Math.min(560, bilde.maksBredde || 560), bilde.maksBredde ? 520 : 420);
     const buf = new Uint8Array(await bilde.blob.arrayBuffer());
     return [
       new Paragraph({
         keepNext: true,
         spacing: { before: 120 },
-        children: [new ImageRun({ type: 'jpg', data: buf, transformation: { width: mal.b, height: mal.h }, altText: { title: fig.tekst, description: fig.tekst, name: 'Figur ' + fig.nr } })],
+        children: [new ImageRun({ type: bilde.type, data: buf, transformation: { width: mal.b, height: mal.h }, altText: { title: fig.tekst, description: fig.tekst, name: 'Figur ' + fig.nr } })],
       }),
       new Paragraph({ style: 'Caption', children: [new TextRun(fig.tekst)] }),
     ];
@@ -84,6 +84,7 @@ export async function lagWord(data, modell, { medBilder = true, bildeMaks = 1280
     innhold.push(new Paragraph({ heading: HeadingLevel.HEADING_1, children: [new TextRun(`${kap} ${s.tittel}`)] }));
     if (!s.observasjoner.length) innhold.push(p('Ingen observasjoner registrert.'));
     for (const fig of s.oversiktFigurer) innhold.push(...(await figur(fig)));
+    for (const t of s.oversiktTekst || []) innhold.push(p(t, { run: { italics: t.startsWith('Kinematisk feltindikator –') }, para: { spacing: { after: 80 } } }));
     for (const x of s.observasjoner) {
       innhold.push(new Paragraph({ heading: HeadingLevel.HEADING_2, keepNext: true, children: [new TextRun(x.overskrift)] }));
       for (const [k, v] of x.felter) innhold.push(feltLinje(k, v));
@@ -101,9 +102,13 @@ export async function lagWord(data, modell, { medBilder = true, bildeMaks = 1280
       }
       if (x.sett.length) {
         innhold.push(p('Sprekkesett', { run: { bold: true }, para: { spacing: { before: 120, after: 40 }, keepNext: true } }));
-        innhold.push(tabell(['Navn', 'Fall/fallretning', 'Strøk/fall', 'Avstand', 'Utholdenhet', 'Ruhet/fylling', 'Kommentar'], x.sett, [14, 14, 12, 10, 12, 18, 20]));
+        innhold.push(tabell(['Navn', 'Fall/fallretning', 'Strøk/fall', 'Avstand', 'Utholdenhet', 'Ruhet/fylling', 'Kommentar'], x.sett, [14, 13, 11, 10, 14, 18, 20]));
       }
       for (const fig of x.skisser) innhold.push(...(await figur(fig)));
+      if (x.kinematikk && x.kinematikk.length) {
+        innhold.push(p('Kinematisk feltindikator', { run: { bold: true }, para: { spacing: { before: 80, after: 40 }, keepNext: true } }));
+        for (const l of x.kinematikk) innhold.push(p(l, { para: { spacing: { after: 20 } } }));
+      }
       innhold.push(new Paragraph({
         spacing: { before: 160, after: 40 },
         children: [

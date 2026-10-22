@@ -15,6 +15,7 @@ import {
 } from '../logikk.js';
 import { go } from '../router.js';
 import { FotoSeksjon } from './foto.js';
+import { PosisjonsSkisse, Kompass, StereonettPanel, Lengdesnitt } from '../skisser/komponenter.js';
 
 export function Observasjon({ id, ny }) {
   const ctx = useCtx();
@@ -160,8 +161,11 @@ export function Observasjon({ id, ny }) {
       <//>
 
       <${Seksjon} tittel="Posisjon">
+        <${PosisjonsSkisse} t=${t} o=${o} onToggle=${(navn) => {
+          const naa = o.posisjon || [];
+          patch('observasjoner', id, { posisjon: naa.includes(navn) ? naa.filter((x) => x !== navn) : [...naa, navn] });
+        }} />
         <${Chips} options=${t.posisjoner} value=${o.posisjon} multi onChange=${lagre('posisjon')} />
-        <p class="hjelp">Skisse for å velge posisjon kommer i fase 4.</p>
       <//>
 
       <${Seksjon} tittel="Type og observasjon">
@@ -179,13 +183,14 @@ export function Observasjon({ id, ny }) {
           ${t.geometri.felt.map((f) => html`<${NumField} key=${f.id} label=${f.navn} enhet=${f.enhet} value=${(o.geometri || {})[f.id]}
             min=${f.min} max=${f.max} heltall=${f.heltall} onSave=${(v) => patch('observasjoner', id, { ['geometri.' + f.id]: v })} />`)}
         </div>
-        <p class="hjelp">Arves fra forrige skjæringsobservasjon. Brukes til skissene i fase 4.</p>
+        <p class="hjelp">Arves fra forrige skjæringsobservasjon. Brukes i snittet over (Posisjon) og som skjæringsflate i stereonettet.</p>
       <//>`}
 
       <${Seksjon} tittel=${`Målinger (${malinger.length})`}>
         ${malinger.map((m) => html`<${MalingRad} key=${m.id} m=${m} t=${t} autoFocus=${m.id === nyMalingId}
           onBytt=${() => byttMaletype(m)} onSlett=${() => slettMaling(m)} />`)}
         <button class="knapp stor full" onClick=${leggTilMaling}>+ Legg til måling</button>
+        ${(t.skisser || []).includes('pahugg-lengdesnitt') && html`<${Lengdesnitt} obsListe=${[o]} malingerFor=${{ [o.id]: malinger }} />`}
       <//>
 
       <${Seksjon} tittel=${`Sprekkesett (${sett.length})`}>
@@ -193,6 +198,7 @@ export function Observasjon({ id, ny }) {
           autoFocus=${s.id === nyttSettId} onSlett=${() => slettSett(s)} />`)}
         <button class="knapp stor full" onClick=${leggTilSett}>+ Legg til sprekkesett</button>
         <p class="hjelp">Format: ${inn.orienteringsformat === 'strok' ? 'strøk/fall (høyrehåndsregel)' : 'fall/fallretning'} – kan endres i Innstillinger.</p>
+        <${StereonettPanel} o=${o} sett=${sett} inn=${inn} erSkjaering=${(t.skisser || []).includes('stereonett')} />
       <//>
 
       <${FotoSeksjon} o=${o} />
@@ -280,6 +286,7 @@ function SettRad({ s, format, felles, autoFocus, onSlett }) {
       s.ruhet || '',
     ].filter(Boolean).join(' · ');
     return html`<button class="rad-kort sammendrag" onClick=${() => setApen(true)}>
+      <span class="sett-kompass"><${Kompass} fall=${s.fall} fallretning=${s.fallretning} storrelse=${40} /></span>
       <span class="sett-navn">${s.navn || 'Uten navn'}</span>
       <span class="sett-orient">${format === 'strok' ? `${fmtRetning(strok)}/${fmtFall(s.fall)}` : `${fmtFall(s.fall)}/${fmtRetning(s.fallretning)}`}</span>
       <span class="sett-detalj">${detaljer || (s.kommentar ? s.kommentar : 'Trykk for å redigere')}</span>
@@ -299,9 +306,14 @@ function SettRad({ s, format, felles, autoFocus, onSlett }) {
       <button class="knapp flat liten fare-tekst" aria-label="Slett sprekkesett" onClick=${onSlett}>✕</button>
     </div>
     <div class="rad2">${orientering}</div>
-    ${harBegge && html`<div class="orientering-sammendrag">
-      Fall/fallretning <strong>${fmtFall(s.fall)}/${fmtRetning(s.fallretning)}</strong> · strøk/fall ${fmtRetning(strok)}/${fmtFall(s.fall)}
-    </div>`}
+    <div class="orientering-rad">
+      <${Kompass} fall=${s.fall} fallretning=${s.fallretning} storrelse=${76} />
+      <div class="orientering-sammendrag">
+        ${harBegge
+          ? html`Fall/fallretning <strong>${fmtFall(s.fall)}/${fmtRetning(s.fallretning)}</strong><br />strøk/fall ${fmtRetning(strok)}/${fmtFall(s.fall)}`
+          : html`Kompasset viser strøklinje og fallpil når fall og retning er fylt ut.`}
+      </div>
+    </div>
     <${Chips} label="Navn" options=${felles.sprekkesettnavn} value=${s.navn} onChange=${(v) => v && patch('sprekkesett', s.id, { navn: v })} kompakt />
     <${TextField} label="Eget navn" value=${s.navn} onSave=${lagre('navn')} autocap="none" />
     <div class="rad2">

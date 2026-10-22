@@ -7,6 +7,7 @@ import { TypeIkon } from '../ikoner.js';
 import { fmtDato, fmtDatoTid, toLocalInput, fromLocalInput, profilTekst, obsNr } from '../util.js';
 import { nyObservasjon } from '../logikk.js';
 import { go } from '../router.js';
+import { BefaringOversikt } from '../skisser/komponenter.js';
 
 /** Kort tekst for et observasjonskort, f.eks. «Observasjon 01 – Profil 920 · Skjæring H · 3 bilder». */
 export function obsTittel(o, ctx, antallBilder = 0) {
@@ -33,12 +34,19 @@ export function Befaring({ id }) {
     const bilder = {};
     for (const f of fotos) bilder[f.obsId] = (bilder[f.obsId] || 0) + 1;
     const prosjekter = (await db.prosjekter.toArray()).filter((x) => !x.slettet);
-    return { b, p, obs, bilder, prosjekter };
+    const gruppe = (liste) => {
+      const m = {};
+      for (const x of liste) if (!x.slettet) (m[x.obsId] ||= []).push(x);
+      return m;
+    };
+    const settFor = gruppe(await db.sprekkesett.where('befaringId').equals(id).toArray());
+    const malingerFor = gruppe(await db.malinger.where('befaringId').equals(id).toArray());
+    return { b, p, obs, bilder, prosjekter, settFor, malingerFor };
   }, [id]);
   const [visHode, setVisHode] = useState(null);
 
   if (!data) return html`<${Topp} tittel="Befaring" tilbake="" /><main class="innhold"><p>Laster …</p></main>`;
-  const { b, p, obs, bilder, prosjekter } = data;
+  const { b, p, obs, bilder, prosjekter, settFor, malingerFor } = data;
   if (!b || b.slettet) {
     return html`<${Topp} tittel="Befaring" tilbake="" /><main class="innhold"><p>Befaringen finnes ikke (kanskje i papirkurven).</p></main>`;
   }
@@ -136,7 +144,7 @@ export function Befaring({ id }) {
         <div class="oversikt typer">
           ${typerForOversikt.map(({ t, n }) => html`<span><${TypeIkon} ikon=${typeCfg(ctx, t).ikon} size=${20} /> ${typeCfg(ctx, t).kortnavn}: ${n}</span>`)}
         </div>
-        <p class="hjelp">Profilstripe og skisser kommer i fase 4.</p>
+        <${BefaringOversikt} ctx=${ctx} b=${b} obs=${obs} settFor=${settFor} malingerFor=${malingerFor} onVelg=${(oid) => go('obs/' + oid)} />
       <//>
 
       <${Seksjon} tittel="Observasjoner">

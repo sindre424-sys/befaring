@@ -54,13 +54,15 @@ export function Eksport({ id }) {
   const b = useLive(() => db.befaringer.get(id), [id]);
   const [medBilder, setMedBilder] = useState(true);
   const [kvalitet, setKvalitet] = useState('Normal');
+  const [medSkisser, setMedSkisser] = useState(true);
+  const [posSkisser, setPosSkisser] = useState(false);
   if (!b) return null;
   const bildeMaks = kvalitet === 'Høy' ? 2000 : 1280;
 
   const hent = async (info) => {
     info('Henter data …');
     const data = await hentBefaringData(id);
-    return { data, modell: byggModell(data) };
+    return { data, modell: byggModell(data, { skisser: medSkisser, posisjonsskisser: posSkisser }) };
   };
 
   const lagExcelFiler = async (info) => {
@@ -116,6 +118,12 @@ export function Eksport({ id }) {
           onChange=${(v) => v && setMedBilder(v === 'Med bilder')} />
         ${medBilder && html`<${Chips} label="Bildekvalitet" options=${['Normal', 'Høy']} value=${kvalitet} onChange=${(v) => v && setKvalitet(v)}
           hjelp="Normal (1280 px) gir mindre filer, som passer for e-post. Høy (2000 px) gir best utskrift." />`}
+        <${Chips} label="Skisser og stereonett" options=${['Med skisser', 'Uten skisser']} value=${medSkisser ? 'Med skisser' : 'Uten skisser'}
+          onChange=${(v) => v && setMedSkisser(v === 'Med skisser')}
+          hjelp="Profilstripe, oppriss, samlet stereonett, tverrsnitt og lengdesnitt per seksjon, og snitt/stereonett per observasjon." />
+        ${medSkisser && html`<${Chips} label="Posisjonsskisse per observasjon (tunnel/påhugg)" options=${['Ja', 'Nei']} value=${posSkisser ? 'Ja' : 'Nei'}
+          onChange=${(v) => v && setPosSkisser(v === 'Ja')} />`}
+        <p class="hjelp">Figurnumrene i Excel og bilde-zip følger valgene her, så lag gjerne alle filene med samme valg.</p>
       <//>
 
       <${EksportKnapp} ikon="📊" tittel="Excel + bilder" beskrivelse="Ark: Befaring, Observasjoner, Målinger, Sprekkesett, Bilder. Bildene i egen zip." lag=${lagExcelFiler} />
