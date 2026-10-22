@@ -4,7 +4,8 @@ import { db, useLive, STANDARD_INNSTILLINGER, setConfigRad, slettConfigRad } fro
 import { useMemo, createContext, useContext } from './lib.js';
 import { slug, uid } from './util.js';
 
-export const STANDARD_TYPER = ['skjaering', 'pahugg', 'tunnel'];
+// Listen over standardtyper leses fra config/typer.json (nye typer krever ingen kodeendring).
+export let STANDARD_TYPER = ['skjaering', 'pahugg', 'tunnel'];
 
 let DEFAULTS = null;
 
@@ -14,8 +15,14 @@ export async function lastStandardConfig() {
     if (!r.ok) throw new Error(`Fant ikke config/${navn}.json`);
     return r.json();
   };
-  const [felles, ...typer] = await Promise.all([hent('felles'), ...STANDARD_TYPER.map(hent)]);
-  DEFAULTS = { felles, typer: Object.fromEntries(typer.map((t) => [t.id, t])) };
+  try {
+    const liste = await hent('typer');
+    if (Array.isArray(liste.typer) && liste.typer.length) STANDARD_TYPER = liste.typer;
+  } catch (e) {
+    console.warn('Fant ikke config/typer.json – bruker innebygd liste', e);
+  }
+  const [felles, qsystem, ...typer] = await Promise.all([hent('felles'), hent('qsystem'), ...STANDARD_TYPER.map(hent)]);
+  DEFAULTS = { felles, qsystem, typer: Object.fromEntries(typer.map((t) => [t.id, t])) };
   return DEFAULTS;
 }
 
@@ -57,7 +64,8 @@ export function byggConfig(rader) {
   const felles = { ...DEFAULTS.felles, ...(map['config:felles'] || {}) };
   const liste = Object.values(typer).sort((a, b) => (a.rekkefolge ?? 99) - (b.rekkefolge ?? 99));
   const innstillinger = { ...STANDARD_INNSTILLINGER, ...(map['generelt'] || {}) };
-  return { typer, felles, liste, innstillinger, fellesEndret: !!map['config:felles'] };
+  const qsystem = map['config:qsystem'] || DEFAULTS.qsystem;
+  return { typer, felles, liste, innstillinger, qsystem, fellesEndret: !!map['config:felles'], qEndret: !!map['config:qsystem'] };
 }
 
 /** Henter konfigurasjon + innstillinger og oppdateres automatisk ved endringer. */
@@ -87,6 +95,12 @@ export async function tilbakestillType(id) {
 }
 export async function lagreFelles(felles) {
   await setConfigRad('config:felles', felles);
+}
+export async function lagreQsystem(q) {
+  await setConfigRad('config:qsystem', q);
+}
+export async function tilbakestillQsystem() {
+  await slettConfigRad('config:qsystem');
 }
 export async function tilbakestillFelles() {
   await slettConfigRad('config:felles');

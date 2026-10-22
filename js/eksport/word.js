@@ -104,6 +104,11 @@ export async function lagWord(data, modell, { medBilder = true, bildeMaks = 1280
         innhold.push(p('Sprekkesett', { run: { bold: true }, para: { spacing: { before: 120, after: 40 }, keepNext: true } }));
         innhold.push(tabell(['Navn', 'Fall/fallretning', 'Strøk/fall', 'Avstand', 'Utholdenhet', 'Ruhet/fylling', 'Kommentar'], x.sett, [14, 13, 11, 10, 14, 18, 20]));
       }
+      if (x.q) {
+        innhold.push(p(`Q-system: ${x.q.tekst}`, { run: { bold: true }, para: { spacing: { before: 120, after: 40 }, keepNext: true } }));
+        innhold.push(tabell(['Parameter', 'Verdi', 'Beskrivelse'], x.q.rader, [14, 16, 70]));
+        if (x.q.kommentar) innhold.push(p(x.q.kommentar, { run: { italics: true } }));
+      }
       for (const fig of x.skisser) innhold.push(...(await figur(fig)));
       if (x.kinematikk && x.kinematikk.length) {
         innhold.push(p('Kinematisk feltindikator', { run: { bold: true }, para: { spacing: { before: 80, after: 40 }, keepNext: true } }));
@@ -138,11 +143,12 @@ export async function lagWord(data, modell, { medBilder = true, bildeMaks = 1280
   kap++;
   innhold.push(new Paragraph({ heading: HeadingLevel.HEADING_1, children: [new TextRun(`${kap} Oppsummering av observasjoner og tiltak`)] }));
   if (modell.oppsummering.length) {
+    const medQ = modell.harQ;
     innhold.push(tabell(
-      ['Obs.', 'Objekttype', 'Profil', 'Type', 'Alvorlighet', 'Vurdering', 'Anbefalte tiltak'],
-      modell.oppsummering.map((r) => [r.nr, r.type, r.profil, r.obsType, r.alvorlighetTekst, r.vurdering, r.tiltak]),
-      [6, 11, 11, 16, 10, 18, 28],
-      (ri, ci) => (ci === 4 && modell.oppsummering[ri].alvorlighet ? ALV_FARGE[modell.oppsummering[ri].alvorlighet] : null),
+      ['Obs.', 'Objekttype', 'Profil', 'Type', ...(medQ ? ['Q'] : []), 'Alvorlighet', 'Vurdering', 'Anbefalte tiltak'],
+      modell.oppsummering.map((r) => [r.nr, r.type, r.profil, r.obsType, ...(medQ ? [r.q] : []), r.alvorlighetTekst, r.vurdering, r.tiltak]),
+      medQ ? [6, 11, 10, 15, 6, 10, 17, 25] : [6, 11, 11, 16, 10, 18, 28],
+      (ri, ci) => (ci === (medQ ? 5 : 4) && modell.oppsummering[ri].alvorlighet ? ALV_FARGE[modell.oppsummering[ri].alvorlighet] : null),
     ));
   } else {
     innhold.push(p('Ingen observasjoner registrert.'));

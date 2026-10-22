@@ -1,0 +1,238 @@
+{
+  "id": "byggegrop",
+  "navn": "Byggegrop",
+  "kortnavn": "Byggegrop",
+  "ikon": "byggegrop",
+  "aktiv": true,
+  "rekkefolge": 4,
+  "profil": {
+    "fra": true,
+    "til": true,
+    "fraNavn": "Akse/profil fra",
+    "tilNavn": "Akse/profil til"
+  },
+  "stedsfelt": [
+    {
+      "id": "side",
+      "navn": "Vegg",
+      "type": "valg",
+      "valg": [
+        "Nord",
+        "Øst",
+        "Sør",
+        "Vest"
+      ],
+      "hjelp": "Hvilken vegg i byggegropa"
+    },
+    {
+      "id": "kote",
+      "navn": "Kote",
+      "type": "tall",
+      "min": -100,
+      "max": 3000,
+      "enhet": "moh."
+    },
+    {
+      "id": "pall",
+      "navn": "Pall/nivå",
+      "type": "heltall",
+      "min": 1,
+      "max": 20
+    }
+  ],
+  "posisjoner": [
+    "Topp/terreng",
+    "Løsmasseskråning",
+    "Overgang løsmasse/berg",
+    "Bergvegg øvre del",
+    "Bergvegg nedre del",
+    "Pall/berme",
+    "Veggfot",
+    "Bunn/pumpegrop",
+    "Hjørne",
+    "Spunt/støttevegg"
+  ],
+  "posisjonsskisse": {
+    "type": "skjaering-snitt",
+    "soner": {
+      "terreng": "Topp/terreng",
+      "losmasseskraning": "Løsmasseskråning",
+      "overgang": "Overgang løsmasse/berg",
+      "ovre": "Bergvegg øvre del",
+      "nedre": "Bergvegg nedre del",
+      "pallkant": "Pall/berme",
+      "fot": "Veggfot",
+      "groft": "Bunn/pumpegrop"
+    },
+    "tekster": {
+      "bunn": "bunn",
+      "groft": "bunn"
+    }
+  },
+  "observasjonstyper": [
+    "Plan utglidning",
+    "Kileutglidning",
+    "Utvelting (toppling)",
+    "Løse blokker",
+    "Sprekker parallelt med veggen",
+    "Forvitring/oppsprukket berg",
+    "Sprengningsskader/bakbrytning",
+    "Vann/lekkasje",
+    "Løsmasser/erosjon i topp",
+    "Deformasjon/setning ved naboer",
+    "Kontroll av sikring",
+    "Avvik",
+    "Annet"
+  ],
+  "status": [
+    "Rensk utført",
+    "Spettrensk utført",
+    "Bolting utført",
+    "Stag/forankring utført",
+    "Nett montert",
+    "Sprøytebetong utført",
+    "Drenering/lensing etablert",
+    "Sikringsgjerde etablert",
+    "Kontrollert sikring",
+    "Annet"
+  ],
+  "maletyper": [
+    {
+      "navn": "Vegghøyde",
+      "enhet": "m",
+      "gruppe": "Geometri",
+      "min": 0,
+      "max": 100
+    },
+    {
+      "navn": "Vegghelning",
+      "enhet": "°",
+      "gruppe": "Geometri",
+      "min": 0,
+      "max": 90
+    },
+    {
+      "navn": "Avstand til nabobygg",
+      "enhet": "m",
+      "gruppe": "Geometri",
+      "min": 0,
+      "max": 500
+    },
+    {
+      "navn": "Løsmassetykkelse",
+      "enhet": "m",
+      "gruppe": "Geometri",
+      "min": 0,
+      "max": 50
+    },
+    {
+      "navn": "Sprekkåpning",
+      "enhet": "mm",
+      "gruppe": "Sprekker og sikring",
+      "min": 0,
+      "max": 500
+    },
+    {
+      "navn": "Boltelengde",
+      "enhet": "m",
+      "gruppe": "Sprekker og sikring",
+      "min": 0,
+      "max": 15
+    },
+    {
+      "navn": "Antall bolter",
+      "enhet": "stk",
+      "gruppe": "Sprekker og sikring",
+      "min": 0,
+      "max": 500,
+      "heltall": true
+    },
+    {
+      "navn": "Staglengde",
+      "enhet": "m",
+      "gruppe": "Sprekker og sikring",
+      "min": 0,
+      "max": 60
+    },
+    {
+      "navn": "Blokkstørrelse",
+      "enhet": "m³",
+      "gruppe": "Blokker",
+      "min": 0,
+      "max": 100
+    },
+    {
+      "navn": "Vannlekkasje",
+      "enhet": "l/min",
+      "gruppe": "Vann",
+      "min": 0,
+      "max": 1000
+    },
+    {
+      "navn": "Annet",
+      "enhet": "",
+      "gruppe": "Annet"
+    }
+  ],
+  "geometri": {
+    "felt": [
+      {
+        "id": "hoyde",
+        "navn": "Vegghøyde",
+        "enhet": "m",
+        "min": 0,
+        "max": 100
+      },
+      {
+        "id": "helning",
+        "navn": "Helning",
+        "enhet": "°",
+        "min": 0,
+        "max": 90
+      },
+      {
+        "id": "antallPaller",
+        "navn": "Antall paller",
+        "enhet": "stk",
+        "min": 0,
+        "max": 20,
+        "heltall": true
+      },
+      {
+        "id": "pallbredde",
+        "navn": "Pallbredde/berme",
+        "enhet": "m",
+        "min": 0,
+        "max": 50
+      },
+      {
+        "id": "groftbredde",
+        "navn": "Bredde bunn/pumpegrøft",
+        "enhet": "m",
+        "min": 0,
+        "max": 30
+      },
+      {
+        "id": "losmasse",
+        "navn": "Løsmassetykkelse",
+        "enhet": "m",
+        "min": 0,
+        "max": 50
+      },
+      {
+        "id": "fallretning",
+        "navn": "Veggens fallretning",
+        "enhet": "°",
+        "min": 0,
+        "max": 360,
+        "heltall": true
+      }
+    ]
+  },
+  "skisser": [
+    "skjaering-snitt",
+    "skjaering-fasade",
+    "stereonett",
+    "rosediagram"
+  ]
+}

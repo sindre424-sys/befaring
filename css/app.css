@@ -387,3 +387,41 @@ input[type='datetime-local'] { min-width: 0; max-width: 100%; display: block; }
 .trafikklys { list-style: none; padding: 0; margin: 8px 0; }
 .trafikklys li { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 0.95rem; }
 .trafikklys .prikk { width: 16px; height: 16px; }
+
+/* ---------- Q-system ---------- */
+.q-resultat { border-radius: var(--radius); padding: 12px 14px; margin-bottom: 12px; border: 3px solid var(--kant); background: var(--bg); text-align: center; }
+.q-resultat.rod { border-color: var(--rod); }
+.q-resultat.gul { border-color: var(--gul); }
+.q-resultat.gronn { border-color: var(--gronn); }
+.q-verdi { font-size: 1.8rem; font-weight: 800; }
+.q-klasse { font-weight: 700; }
+.q-deler { color: var(--tekst2); font-size: 0.88rem; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.q-param { border-top: 1px solid var(--kant); padding-top: 10px; margin-top: 10px; }
+.q-param-topp { margin-bottom: 6px; }
+.q-param-rad { display: grid; grid-template-columns: 1fr 96px; gap: 0 10px; align-items: end; }
+.q-param-rad > * { min-width: 0; }
+.q-param select { font-size: 15px; }
+
+/* ---------- Tegning på bilder ---------- */
+.miniatyr { position: relative; }
+.tegning-overlegg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.tegnet-merke { position: absolute; right: 3px; bottom: 2px; font-size: 14px; }
+.fullt-ramme { position: relative; display: inline-block; max-width: 100%; max-height: 100%; line-height: 0; }
+.fullt-ramme .fullt-bilde { max-height: calc(100vh - 220px); }
+.tegnemodus { position: fixed; inset: 0; z-index: 90; background: #000; color: #fff; display: flex; flex-direction: column;
+  padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom); }
+.tegne-topp { display: flex; justify-content: space-between; align-items: center; padding: 4px 10px; gap: 8px; }
+.tegne-topp .knapp.flat { color: #fff; }
+.tegne-flate { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 4px; }
+.tegne-ramme { position: relative; display: inline-block; line-height: 0; max-width: 100%; max-height: 100%; }
+.tegne-ramme img { max-width: 100%; max-height: calc(100vh - 300px); display: block; }
+.tegne-svg { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; }
+.tegne-verktoy { padding: 6px 10px; background: #111; }
+.tegne-verktoy .chips { margin-bottom: 6px; }
+.tegne-verktoy .chip { background: #222; color: #fff; border-color: #444; }
+.tegne-verktoy .chip.valgt { background: #4da3ff; color: #04111f; border-color: #4da3ff; }
+.tegne-verktoy .hjelp { color: #bbb; }
+.fargeprikk { width: 16px; height: 16px; border-radius: 50%; border: 1px solid #888; display: inline-block; }
+.farge-chip.valgt::before { content: ''; }
+.tegne-tekst { display: flex; gap: 8px; padding: 8px 10px; background: #1b1b1b; }
+.tegne-tekst input { flex: 1; background: #fff; color: #000; }

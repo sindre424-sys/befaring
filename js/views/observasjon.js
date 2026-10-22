@@ -15,6 +15,7 @@ import {
 } from '../logikk.js';
 import { go } from '../router.js';
 import { FotoSeksjon } from './foto.js';
+import { QSeksjon } from './qsystem.js';
 import { PosisjonsSkisse, Kompass, StereonettPanel, Lengdesnitt } from '../skisser/komponenter.js';
 
 export function Observasjon({ id, ny }) {
@@ -200,6 +201,8 @@ export function Observasjon({ id, ny }) {
         <p class="hjelp">Format: ${inn.orienteringsformat === 'strok' ? 'strøk/fall (høyrehåndsregel)' : 'fall/fallretning'} – kan endres i Innstillinger.</p>
         <${StereonettPanel} o=${o} sett=${sett} inn=${inn} erSkjaering=${(t.skisser || []).includes('stereonett')} />
       <//>
+
+      ${t.qsystem && html`<${QSeksjon} o=${o} t=${t} tabell=${ctx.config.qsystem} />`}
 
       <${FotoSeksjon} o=${o} />
 

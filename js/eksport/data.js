@@ -8,10 +8,12 @@ import { fallretningTilStrok, fmtRetning, fmtFall } from '../logikk.js';
 import { lagBygger, tilSvgTekst, RAPPORT_FARGER } from '../skisser/svg.js';
 import { tegnProfilstripe } from '../skisser/profilstripe.js';
 import { tegnTunnel } from '../skisser/tunnel.js';
-import { tegnSkjaeringSnitt, tegnSkjaeringFasade } from '../skisser/skjaering.js';
+import { tegnSkjaeringSnitt, tegnSkjaeringFasade, sideEtikett } from '../skisser/skjaering.js';
 import { tegnPahuggFront, tegnPahuggLengdesnitt, pahuggData, harLengdesnittData } from '../skisser/pahugg.js';
 import { tegnStereonett, kinematikkTekst, ANSVARSTEKST } from '../skisser/stereonett.js';
-import { analyseForObs, samletPerSide, posisjonsOversikt } from '../skisser/data.js';
+import { analyseForObs, samletPerSide, posisjonsOversikt, sprekkerFor } from '../skisser/data.js';
+import { tegnRose, ROSE_MIN_ANTALL } from '../skisser/rose.js';
+import { beregnQ, qTekst, qRader, fmtQ } from '../qsystem.js';
 
 const R = lagBygger('rapport');
 const RF = RAPPORT_FARGER;
@@ -56,7 +58,7 @@ export function typeFor(config, id) {
 /** «Observasjon 01 – Profil 920–935, skjæring høyre side» */
 export function obsOverskrift(o, t) {
   let s = `Observasjon ${obsNr(o.lopenr)} – ${profilTekst(o.profilFra, o.profilTil)}, ${(t.kortnavn || t.navn).toLowerCase()}`;
-  if (o.sted && o.sted.side) s += ` ${o.sted.side.toLowerCase()} side`;
+  if (o.sted && o.sted.side) s += ` ${sideEtikett(o.sted.side).toLowerCase()}`;
   if (o.sted && o.sted.del) s += `, ${o.sted.del.toLowerCase()}`;
   return s;
 }
@@ -108,18 +110,18 @@ export function byggModell(data, valg = {}) {
       seksjon.oversiktFigurer.push(nyFigur(skisseFigur(tegnProfilstripe(R, RF, { rader: [{ navn: t.kortnavn || t.navn, obs: liste }], bredde: 560 }), 560),
         `Profilstripe – ${t.navn.toLowerCase()}. Observasjonene er farget etter alvorlighet.`));
       if (skisser.includes('skjaering-fasade')) {
-        for (const side of ['Venstre', 'Høyre']) {
+        for (const side of ((t.stedsfelt || []).find((sf) => sf.id === 'side') || {}).valg || ['Venstre', 'Høyre']) {
           const pa = liste.filter((o) => o.sted && o.sted.side === side);
-          if (pa.length) seksjon.oversiktFigurer.push(nyFigur(skisseFigur(tegnSkjaeringFasade(R, RF, { obs: pa, side, soner: ps.soner, bredde: 520 }), 520),
-            `Oppriss av skjæringen, ${side.toLowerCase()} side, med observasjonene plottet der de ble registrert.`));
+          if (pa.length) seksjon.oversiktFigurer.push(nyFigur(skisseFigur(tegnSkjaeringFasade(R, RF, { obs: pa, side, soner: ps.soner, bredde: 520, typeNavn: t.navn }), 520),
+            `Oppriss, ${t.navn.toLowerCase()} – ${sideEtikett(side).toLowerCase()}, med observasjonene plottet der de ble registrert.`));
         }
       }
       if (erSkjaering) {
         for (const s of samletPerSide(liste, sett, inn)) {
-          seksjon.oversiktFigurer.push(nyFigur(skisseFigur(tegnStereonett(R, RF, { sett: s.sprekker, flate: s.flate, analyse: s.analyse, medForklaring: true, tittel: `Samlet – ${s.side.toLowerCase()} side`, bredde: 340 }), 340),
-            `Samlet stereonett (likeareal, nedre halvkule), ${s.side.toLowerCase()} side.`));
+          seksjon.oversiktFigurer.push(nyFigur(skisseFigur(tegnStereonett(R, RF, { sett: s.sprekker, flate: s.flate, analyse: s.analyse, medForklaring: true, tittel: `Samlet – ${sideEtikett(s.side).toLowerCase()}`, bredde: 340 }), 340),
+            `Samlet stereonett (likeareal, nedre halvkule), ${t.navn.toLowerCase()} – ${sideEtikett(s.side).toLowerCase()}.`));
           if (s.analyse) {
-            seksjon.oversiktTekst.push(`Kinematisk feltindikator, ${s.side.toLowerCase()} side (φ = ${s.analyse.phi}°, ±${s.analyse.lat}°): `
+            seksjon.oversiktTekst.push(`Kinematisk feltindikator, ${sideEtikett(s.side).toLowerCase()} (φ = ${s.analyse.phi}°, ±${s.analyse.lat}°): `
               + kinematikkTekst(s.analyse).map((l) => l.full).join('; ') + '.');
           }
         }
@@ -132,6 +134,11 @@ export function byggModell(data, valg = {}) {
       if (ps.type === 'pahugg-front' && skisser.includes('pahugg-front')) {
         seksjon.oversiktFigurer.push(nyFigur(skisseFigur(tegnPahuggFront(R, RF, { oversikt: posisjonsOversikt(liste), soner: ps.soner, bredde: 300 }), 300),
           'Påhuggsflaten sett forfra med antall observasjoner per posisjon, farget etter verste alvorlighet.'));
+      }
+      const roseSett = sprekkerFor(liste, sett, inn);
+      if (roseSett.length >= ROSE_MIN_ANTALL) {
+        seksjon.oversiktFigurer.push(nyFigur(skisseFigur(tegnRose(R, RF, { sett: roseSett, modus: 'strok', tittel: t.navn, bredde: 300 }), 300),
+          `Rosediagram over strøkretning for registrerte sprekkesett, ${t.navn.toLowerCase()} (n = ${roseSett.length}).`));
       }
       if (skisser.includes('pahugg-lengdesnitt')) {
         const d = pahuggData(liste, malinger);
@@ -179,8 +186,8 @@ export function byggModell(data, valg = {}) {
         const g = o.geometri || {};
         if (ps.type === 'skjaering-snitt' && ['hoyde', 'helning', 'groftbredde', 'losmasse'].some((k) => g[k] !== null && g[k] !== undefined && g[k] !== '')) {
           const side = (o.sted && o.sted.side) || 'Høyre';
-          skisseFigurer.push(nyFigur(skisseFigur(tegnSkjaeringSnitt(R, RF, { geometri: g, side, valgte: o.posisjon || [], soner: ps.soner, bredde: 340 }), 340),
-            `Skjæringssnitt, ${prof.toLowerCase()}, ${side.toLowerCase()} side${o.posisjon && o.posisjon.length ? ' – ' + o.posisjon.join(', ').toLowerCase() : ''}.`));
+          skisseFigurer.push(nyFigur(skisseFigur(tegnSkjaeringSnitt(R, RF, { geometri: g, side, valgte: o.posisjon || [], soner: ps.soner, bredde: 340, tekster: ps.tekster || {} }), 340),
+            `Snitt, ${prof.toLowerCase()}, ${sideEtikett(side).toLowerCase()}${o.posisjon && o.posisjon.length ? ' – ' + o.posisjon.join(', ').toLowerCase() : ''}.`));
         } else if (medPosisjon && o.posisjon && o.posisjon.length && (ps.type === 'tunnel-tverrsnitt' || ps.type === 'pahugg-front')) {
           const tegn = ps.type === 'tunnel-tverrsnitt' ? tegnTunnel : tegnPahuggFront;
           skisseFigurer.push(nyFigur(skisseFigur(tegn(R, RF, { valgte: o.posisjon, soner: ps.soner, bredde: 300 }), 260),
@@ -209,6 +216,10 @@ export function byggModell(data, valg = {}) {
       seksjon.observasjoner.push({
         o, t, overskrift: obsOverskrift(o, t), felter, tekst: o.tekst || '', geometri, malinger: mal, sett: settRader,
         skisser: skisseFigurer, kinematikk,
+        q: t.qsystem && o.q ? (() => {
+          const r = beregnQ(o.q, config.qsystem, t.qsystem.jnFaktor || 1);
+          return { tekst: qTekst(r) || 'Q ikke fullstendig registrert', rader: qRader(o.q, r, config.qsystem), kommentar: o.q.kommentar || '', Q: r.Q };
+        })() : null,
         vurdering: o.vurdering || '', alvorlighet: o.alvorlighet || null, tiltak: o.tiltak || '', figurer,
       });
     }
@@ -243,7 +254,9 @@ export function byggModell(data, valg = {}) {
     ['Objekttyper', meta.objekttyper.join(', ')],
   ].filter(([, v]) => v);
 
+  const harQ = seksjoner.some((s) => s.observasjoner.some((x) => x.q && x.q.Q !== null));
   const oppsummering = seksjoner.flatMap((s) => s.observasjoner.map((x) => ({
+    q: x.q && x.q.Q !== null ? fmtQ(x.q.Q) : '',
     nr: obsNr(x.o.lopenr),
     type: x.t.kortnavn || x.t.navn,
     profil: profilTekst(x.o.profilFra, x.o.profilTil).replace('Profil ', ''),
@@ -254,7 +267,7 @@ export function byggModell(data, valg = {}) {
     tiltak: x.tiltak,
   })));
 
-  return { meta, infoRader, seksjoner, oppsummering, figurFor, antallFigurer: figNr };
+  return { meta, infoRader, seksjoner, oppsummering, harQ, figurFor, antallFigurer: figNr };
 }
 
 // Farger for alvorlighet i rapporter (lys bakgrunn som også tåler utskrift i gråtoner)
@@ -296,7 +309,12 @@ export async function figurBilde(fig, bildeMaks) {
     const blob = await svgTilPng(fig.svg, fig.bredde, fig.hoyde, 3);
     return { blob, bredde: fig.bredde, hoyde: fig.hoyde, type: 'png', maksBredde: fig.maksBredde };
   }
-  const b = await bildeForRapport(fig.foto.blob, bildeMaks);
+  let kilde = fig.foto.blob;
+  if (fig.foto.tegning && fig.foto.tegning.figurer && fig.foto.tegning.figurer.length) {
+    const { bildeMedTegning } = await import('../tegning.js');
+    kilde = await bildeMedTegning(fig.foto);
+  }
+  const b = await bildeForRapport(kilde, bildeMaks);
   return { ...b, type: 'jpg', maksBredde: null };
 }
 

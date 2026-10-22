@@ -125,6 +125,11 @@
   "geometri": null,
   "skisser": [
     "pahugg-front",
-    "pahugg-lengdesnitt"
-  ]
+    "pahugg-lengdesnitt",
+    "rosediagram"
+  ],
+  "qsystem": {
+    "jnFaktor": 2,
+    "jnFaktorTekst": "Påhugg: 2 × Jn"
+  }
 }

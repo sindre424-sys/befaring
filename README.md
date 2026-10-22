@@ -116,6 +116,22 @@ Ta en sikkerhetskopi før du oppdaterer (Innstillinger → Sikkerhetskopi). Oppd
 
 > Stereonettet er en **feltindikator** og erstatter ikke en fullstendig stabilitetsvurdering.
 
+## Teste versjon 0.5.0 (Q-system, tegning, rosediagram, Byggegrop)
+
+Ta sikkerhetskopi før du oppdaterer. For å se de nye testdataene: Innstillinger → «Fjern testdata» → «Last inn testdata».
+
+- [ ] **Q-system** (Tunnel og Tunnelpåhugg): «+ Registrer Q-verdi» i observasjonen. Velg fra tabellene eller skriv inn
+  verdien direkte. Q og bergmasseklasse beregnes med en gang. Påhugg bruker 2 × Jn som standard. Kan byttes til Normalt/Kryss (3 × Jn).
+  Testdata: obs. 05 (Q = 2,0), 07 (Q = 0,11) og 08 (Q = 28).
+- [ ] **Kontroller Q-tabellene** mot din utgave av NGI-håndboka: Innstillinger → Felles valglister → Q-system.
+  Tekstene er oversatt av meg (Claude) og bør leses gjennom av deg.
+- [ ] **Tegning på bilder:** Trykk på et bilde → «✏️ Tegn». Pil og sirkel: dra med fingeren. Tekst: trykk der teksten skal stå.
+  «Angre», «Tøm», «Avbryt» og «Ferdig». Miniatyren får et ✏️-merke. Originalbildet endres aldri.
+- [ ] **Rosediagram:** Under «Vis skisser og stereonett» på befaringssiden, per objekttype (minst 3 sprekkesett). Bytt mellom Strøk og Fallretning.
+- [ ] **Byggegrop:** «Ny befaring» har nå Byggegrop. Veggene heter Nord/Øst/Sør/Vest, og snitt, oppriss og stereonett virker som for skjæring.
+- [ ] **Eksport:** Q-tabell per observasjon og Q-kolonne i oppsummeringen (Word/PDF), Q-kolonner i Excel, rosediagram som figur,
+  og bilder med tegning (originalen ligger også i bilde-zip-en som `…_original.jpg`).
+
 > **Viktig før du bruker appen i felt:** Ta sikkerhetskopi jevnlig og lagre den utenfor telefonen (OneDrive/e-post).
 > Data som bare ligger på telefonen, forsvinner hvis telefonen blir borte.
 
@@ -123,7 +139,7 @@ Ta en sikkerhetskopi før du oppdaterer (Innstillinger → Sikkerhetskopi). Oppd
 
 | Mappe/fil | Innhold |
 |---|---|
-| `config/*.json` | Standardoppsett per objekttype (stedsfelt, posisjoner, typer, status, måletyper) og felles lister |
+| `config/*.json` | Standardoppsett per objekttype (stedsfelt, posisjoner, typer, status, måletyper), felles lister og Q-tabeller. `typer.json` lister objekttypene – en ny type legges til med en ny fil og en linje her, uten kodeendring |
 | `js/db.js` | Lokal database (IndexedDB via Dexie) |
 | `js/config.js` | Slår sammen standardoppsett med endringer gjort i Innstillinger |
 | `js/views/` | Skjermene |
@@ -131,6 +147,8 @@ Ta en sikkerhetskopi før du oppdaterer (Innstillinger → Sikkerhetskopi). Oppd
 | `js/views/foto.js` | Bildedelen i observasjonen |
 | `js/eksport/` | Excel, Word, PDF og Dips. `data.js` bygger én felles rapportmodell for Word og PDF |
 | `js/skisser/` | Alle skisser (SVG): profilstripe, kompass, tunnel, skjæring (snitt/oppriss), påhugg (front/lengdesnitt) og stereonett med kinematikk. Samme kode tegner i appen og i Word/PDF |
+| `js/qsystem.js`, `js/views/qsystem.js` | Q-beregning og skjema |
+| `js/tegning.js` | Tegning på bilder (lagres som vektordata, originalen endres ikke) |
 | `js/sikkerhetskopi.js` | Sikkerhetskopi til zip og gjenoppretting (slår sammen, sletter aldri) |
 | `js/testdata.js` | Fiktive testdata (også fiktive bilder) |
 | `sw.js` | Offline-støtte. Lista `FILER` må inneholde alle filer appen bruker |

@@ -80,6 +80,10 @@ export async function lagPdf(data, modell, { medBilder = true, bildeMaks = 1280,
         innhold.push(undertittel('Sprekkesett'), tabell(['Navn', 'Fall/fallretning', 'Strøk/fall', 'Avstand', 'Utholdenhet', 'Ruhet/fylling', 'Kommentar'],
           x.sett, [58, 50, 42, 36, 56, 64, '*']));
       }
+      if (x.q) {
+        innhold.push(undertittel(`Q-system: ${x.q.tekst}`), tabell(['Parameter', 'Verdi', 'Beskrivelse'], x.q.rader, [50, 64, '*']));
+        if (x.q.kommentar) innhold.push({ text: x.q.kommentar, italics: true, margin: [0, 0, 0, 4] });
+      }
       for (const fig of x.skisser) innhold.push(await figur(fig));
       if (x.kinematikk && x.kinematikk.length) innhold.push(undertittel('Kinematisk feltindikator'), ...x.kinematikk.map((l) => ({ text: l, margin: [0, 0, 0, 1] })));
       innhold.push({
@@ -103,11 +107,12 @@ export async function lagPdf(data, modell, { medBilder = true, bildeMaks = 1280,
   kap++;
   innhold.push({ text: `${kap} Oppsummering av observasjoner og tiltak`, style: 'h1', pageBreak: undefined });
   if (modell.oppsummering.length) {
+    const medQ = modell.harQ;
     innhold.push(tabell(
-      ['Obs.', 'Objekttype', 'Profil', 'Type', 'Alvorlighet', 'Vurdering', 'Anbefalte tiltak'],
-      modell.oppsummering.map((r) => [r.nr, r.type, r.profil, r.obsType, r.alvorlighetTekst, r.vurdering, r.tiltak]),
-      [24, 48, 48, 66, 44, 74, '*'],
-      (ri, ci) => (ci === 4 && modell.oppsummering[ri].alvorlighet ? '#' + ALV_FARGE[modell.oppsummering[ri].alvorlighet] : undefined),
+      ['Obs.', 'Objekttype', 'Profil', 'Type', ...(medQ ? ['Q'] : []), 'Alvorlighet', 'Vurdering', 'Anbefalte tiltak'],
+      modell.oppsummering.map((r) => [r.nr, r.type, r.profil, r.obsType, ...(medQ ? [r.q] : []), r.alvorlighetTekst, r.vurdering, r.tiltak]),
+      medQ ? [22, 44, 44, 60, 28, 42, 66, '*'] : [24, 48, 48, 66, 44, 74, '*'],
+      (ri, ci) => (ci === (medQ ? 5 : 4) && modell.oppsummering[ri].alvorlighet ? '#' + ALV_FARGE[modell.oppsummering[ri].alvorlighet] : undefined),
     ));
   } else {
     innhold.push({ text: 'Ingen observasjoner registrert.' });

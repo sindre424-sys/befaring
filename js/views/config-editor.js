@@ -2,7 +2,7 @@
 // Endringer her sletter aldri registrerte data: verdier som fjernes fra en liste
 // blir stående på observasjonene og vises som «(ikke i listen)».
 import { html, useState } from '../lib.js';
-import { useCtx, lagreType, tilbakestillType, lagreFelles, tilbakestillFelles, standardConfig } from '../config.js';
+import { useCtx, lagreType, tilbakestillType, lagreFelles, tilbakestillFelles, standardConfig, lagreQsystem, tilbakestillQsystem } from '../config.js';
 import { Topp, Seksjon, TextField, NumField, Bryter, Chips, visMelding, bekreft } from '../ui.js';
 import { TypeIkon, IKON_VALG } from '../ikoner.js';
 import { slug } from '../util.js';
@@ -184,6 +184,16 @@ export function FellesRedigerer() {
           felt=${[{ id: 'navn', navn: 'Navn' }, { id: 'alvorlighet', navn: 'Alvorlighet', type: 'valg', valg: ['gronn', 'gul', 'rod'] }]} />
       <//>
       <${Seksjon} tittel="Hurtignavn for sprekkesett"><${ListeRedigerer} liste=${f.sprekkesettnavn} onChange=${lagre('sprekkesettnavn')} /><//>
+      <${Seksjon} tittel="Q-system (tabellverdier)">
+        <p class="hjelp">${ctx.config.qsystem.kilde || ''} Endringer gjelder nye valg – verdier som allerede er registrert, beholdes.</p>
+        <${JsonRedigerer} verdi=${ctx.config.qsystem} onBruk=${lagreQsystem} />
+        ${ctx.config.qEndret && html`<button class="knapp fare-tekst" onClick=${async () => {
+          if (!(await bekreft('Tilbakestille Q-tabellene til standard?', { ok: 'Tilbakestill', fare: true }))) return;
+          const gammel = ctx.config.qsystem;
+          await tilbakestillQsystem();
+          visMelding('Tilbakestilt.', { angre: () => lagreQsystem(gammel) });
+        }}>Tilbakestill Q-tabeller</button>`}
+      <//>
       <${Seksjon} tittel="Avansert">
         <${JsonRedigerer} verdi=${f} onBruk=${lagreFelles} />
         ${ctx.config.fellesEndret && html`<button class="knapp fare-tekst" onClick=${async () => {

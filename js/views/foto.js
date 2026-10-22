@@ -4,6 +4,7 @@ import { useLive, patch, softDelete, restore } from '../db.js';
 import { Seksjon, TextField, visMelding, flushAll, bekreft } from '../ui.js';
 import { lagreFoto, hentFotos, stedForFoto, Miniatyr, FulltBilde } from '../bilder.js';
 import { fmtDatoTid } from '../util.js';
+import { Tegnemodus } from '../tegning.js';
 
 export function FotoSeksjon({ o }) {
   const fotos = useLive(() => hentFotos(o.id), [o.id], []);
@@ -113,9 +114,12 @@ function FotoKort({ f, standardSted, onVis, onSlett }) {
 
 function Visning({ fotos, indeks, standardSted, onBytt, onLukk }) {
   const f = fotos[indeks];
+  const [tegner, setTegner] = useState(false);
+  if (tegner) return html`<${Tegnemodus} foto=${f} onLukk=${() => setTegner(false)} />`;
   return html`<div class="visning" role="dialog" aria-modal="true">
     <div class="visning-topp">
       <span>${indeks + 1} / ${fotos.length}</span>
+      <button class="knapp flat" onClick=${() => setTegner(true)}>✏️ Tegn</button>
       <button class="knapp flat" onClick=${onLukk}>Lukk ✕</button>
     </div>
     <div class="visning-bilde"><${FulltBilde} foto=${f} /></div>

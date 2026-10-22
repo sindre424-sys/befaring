@@ -5,6 +5,7 @@ import { stedForFoto } from '../bilder.js';
 import { fallretningTilStrok } from '../logikk.js';
 import { tilUtm } from '../utm.js';
 import { ALVORLIGHET, obsNr, profilTekst } from '../util.js';
+import { beregnQ, qKlasse } from '../qsystem.js';
 
 const XLSX_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
@@ -53,6 +54,7 @@ export async function lagExcel(data, modell) {
     for (const sf of t.stedsfelt || []) if (!stedKol.some((k) => k.id === sf.id)) stedKol.push(sf);
     for (const f of (t.geometri && t.geometri.felt) || []) if (!geoKol.some((k) => k.id === f.id)) geoKol.push(f);
   }
+  const medQ = typer.some((t) => t.qsystem);
   const harFelt = (o, id, kilde) => (kilde === 'sted' ? (T(o).stedsfelt || []) : ((T(o).geometri && T(o).geometri.felt) || [])).some((x) => x.id === id);
 
   const wb = XLSX.utils.book_new();
@@ -81,9 +83,15 @@ export async function lagExcel(data, modell) {
     { navn: 'Breddegrad (WGS84)' }, { navn: 'Lengdegrad (WGS84)' }, { navn: 'GPS-nøyaktighet [m]' },
     { navn: `UTM${sone} Øst` }, { navn: `UTM${sone} Nord` }, { navn: 'Antall målinger' }, { navn: 'Antall sprekkesett' },
     { navn: 'Antall bilder' },
+    ...(medQ ? ['RQD', 'Jn', 'Jn-faktor', 'Jr', 'Ja', 'Jw', 'SRF', 'Q', 'Q-klasse', 'Q-kommentar'].map((navn) => ({ navn })) : []),
   ];
   const obsRader = obs.map((o) => {
     const utm = o.gps ? tilUtm(o.gps.lat, o.gps.lon, sone) : null;
+    const tq = T(o).qsystem;
+    const qr = tq && o.q ? beregnQ(o.q, config.qsystem, tq.jnFaktor || 1) : null;
+    const qv = (k) => (qr && o.q[k] ? o.q[k].verdi ?? null : null);
+    const qKol = medQ ? (qr ? [qv('RQD'), qv('Jn'), qr.faktor, qr.jr ?? null, qv('Ja'), qv('Jw'), qv('SRF'),
+      qr.Q !== null ? Number(qr.Q.toPrecision(3)) : null, qr.klasse ? qr.klasse.navn : null, o.q.kommentar || null] : new Array(10).fill(null)) : [];
     return [
       o.id, o.befaringId, o.lopenr, T(o).navn, o.tid, o.profilFra, o.profilTil, o.omrade,
       ...stedKol.map((sf) => (harFelt(o, sf.id, 'sted') ? (o.sted || {})[sf.id] : null)),
@@ -93,6 +101,7 @@ export async function lagExcel(data, modell) {
       o.gps ? o.gps.lat : null, o.gps ? o.gps.lon : null, o.gps ? o.gps.noyaktighet : null,
       utm ? utm.ost : null, utm ? utm.nord : null,
       (malinger[o.id] || []).length, (sett[o.id] || []).length, (fotos[o.id] || []).length,
+      ...qKol,
     ];
   });
   XLSX.utils.book_append_sheet(wb, lagArk(XLSX, obsKol, obsRader), 'Observasjoner');
@@ -132,16 +141,24 @@ export async function lagExcel(data, modell) {
   for (const o of obs) for (const f of fotos[o.id] || []) {
     const nr = modell.figurFor[f.id];
     const filnavn = bildeFilnavn(nr, o, f);
-    bildeFiler.push({ filnavn, blob: f.blob });
+    if (f.tegning && f.tegning.figurer && f.tegning.figurer.length) {
+      const { bildeMedTegning } = await import('../tegning.js');
+      bildeFiler.push({ filnavn, blob: await bildeMedTegning(f) });
+      bildeFiler.push({ filnavn: filnavn.replace('.jpg', '_original.jpg'), blob: f.blob });
+    } else {
+      bildeFiler.push({ filnavn, blob: f.blob });
+    }
     bildeRader.push([
       f.id, o.id, o.lopenr, T(o).navn, nr, filnavn, f.tid, f.sted || stedForFoto(o), f.kommentar,
       f.gps ? f.gps.lat : null, f.gps ? f.gps.lon : null, f.bredde, f.hoyde,
+      f.tegning && f.tegning.figurer ? f.tegning.figurer.length || null : null,
     ]);
   }
   XLSX.utils.book_append_sheet(wb, lagArk(XLSX, [
     { navn: 'Bilde-ID' }, { navn: 'Obs-ID' }, { navn: 'Løpenr' }, { navn: 'Objekttype' }, { navn: 'Figurnr' },
     { navn: 'Filnavn' }, { navn: 'Tidspunkt', type: 'dato', bredde: 17 }, { navn: 'Sted/profil' }, { navn: 'Kommentar' },
     { navn: 'Breddegrad (WGS84)' }, { navn: 'Lengdegrad (WGS84)' }, { navn: 'Bredde [px]' }, { navn: 'Høyde [px]' },
+    { navn: 'Tegning (antall figurer)' },
   ], bildeRader), 'Bilder');
 
   wb.Props = { Title: modell.meta.tittel, Author: b.utfortAv || '', CreatedDate: new Date() };

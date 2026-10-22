@@ -4,6 +4,7 @@ import { html, useState, useEffect } from './lib.js';
 import { db, add, patch, getInnstillinger } from './db.js';
 import { uid, profilTekst } from './util.js';
 import { hentGpsPosisjon } from './logikk.js';
+import { TegningOverlegg } from './tegning.js';
 
 export const MAKS_LANGSIDE = 2000;
 export const KVALITET = 0.85;
@@ -120,6 +121,8 @@ export function Miniatyr({ foto, onClick, klasse = 'miniatyr' }) {
   }
   return html`<button type="button" class=${klasse} onClick=${onClick} aria-label="Vis bildet i full størrelse">
     ${url ? html`<img src=${url} alt="" />` : html`<span>?</span>`}
+    <${TegningOverlegg} tegning=${foto.tegning} dekk />
+    ${foto.tegning && foto.tegning.figurer && foto.tegning.figurer.length ? html`<span class="tegnet-merke" aria-hidden="true">✏️</span>` : ''}
   </button>`;
 }
 
@@ -132,7 +135,7 @@ export function FulltBilde({ foto }) {
     setUrl(u);
     return () => URL.revokeObjectURL(u);
   }, [foto && foto.id]);
-  return url ? html`<img class="fullt-bilde" src=${url} alt=${foto.kommentar || 'Bilde'} />` : null;
+  return url ? html`<span class="fullt-ramme"><img class="fullt-bilde" src=${url} alt=${foto.kommentar || 'Bilde'} /><${TegningOverlegg} tegning=${foto.tegning} /></span>` : null;
 }
 
 export async function hentFotos(obsId) {

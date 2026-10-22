@@ -4,14 +4,17 @@ import { lagBygger, APP_FARGER } from './svg.js';
 import { tegnProfilstripe } from './profilstripe.js';
 import { tegnKompass } from './kompass.js';
 import { tegnTunnel } from './tunnel.js';
-import { tegnSkjaeringSnitt, tegnSkjaeringFasade } from './skjaering.js';
+import { tegnSkjaeringSnitt, tegnSkjaeringFasade, sideEtikett } from './skjaering.js';
 import { tegnPahuggFront, tegnPahuggLengdesnitt, pahuggData, harLengdesnittData } from './pahugg.js';
 import { tegnStereonett, kinematikkTekst, ANSVARSTEKST } from './stereonett.js';
-import { analyseForObs, samletPerSide, posisjonsOversikt } from './data.js';
+import { analyseForObs, samletPerSide, posisjonsOversikt, sprekkerFor } from './data.js';
+import { tegnRose, ROSE_MIN_ANTALL } from './rose.js';
 import { typeCfg } from '../config.js';
 import { fmtFall, fmtRetning } from '../logikk.js';
 
 const A = lagBygger('app');
+/** Sidene som skal vises som egne oppriss (fra stedsfeltet «side», standard Venstre/Høyre). */
+export const sideValg = (t) => ((t.stedsfelt || []).find((sf) => sf.id === 'side') || {}).valg || ['Venstre', 'Høyre'];
 const F = APP_FARGER;
 
 export const Kompass = ({ fall, fallretning, storrelse = 64 }) => tegnKompass(A, F, { fall, fallretning, storrelse });
@@ -24,7 +27,7 @@ export function PosisjonsSkisse({ t, o, onToggle }) {
   const felles = { valgte, onVelg: onToggle, soner: ps.soner, bredde: 340 };
   let svg = null;
   if (ps.type === 'tunnel-tverrsnitt') svg = tegnTunnel(A, F, felles);
-  else if (ps.type === 'skjaering-snitt') svg = tegnSkjaeringSnitt(A, F, { ...felles, geometri: o.geometri, side: (o.sted && o.sted.side) || 'Høyre' });
+  else if (ps.type === 'skjaering-snitt') svg = tegnSkjaeringSnitt(A, F, { ...felles, geometri: o.geometri, side: (o.sted && o.sted.side) || sideValg(t)[sideValg(t).length - 1], tekster: ps.tekster || {} });
   else if (ps.type === 'pahugg-front') svg = tegnPahuggFront(A, F, felles);
   if (!svg) return null;
   return html`<div class="skisse-boks">${svg}
@@ -60,6 +63,17 @@ export function Lengdesnitt({ obsListe, malingerFor }) {
     <p class="hjelp">Tegnet fra målingene Bergoverdekning, Løsmassetykkelse, Spilingslengde/Antall spiler og Buesenteravstand.</p></div>`;
 }
 
+export function RosePanel({ sett, tittel }) {
+  const [modus, setModus] = useState('strok');
+  if (sett.length < ROSE_MIN_ANTALL) return null;
+  return html`<div class="skisse-boks">
+    <div class="chips kompakt" role="group">
+      ${[['strok', 'Strøk'], ['fallretning', 'Fallretning']].map(([k, n]) => html`<button class=${'chip' + (modus === k ? ' valgt' : '')} onClick=${() => setModus(k)}>${n}</button>`)}
+    </div>
+    ${tegnRose(A, F, { sett, modus, tittel, bredde: 300 })}
+  </div>`;
+}
+
 function lesApen() {
   try { return localStorage.getItem('oversiktApen') === '1'; } catch (e) { return false; }
 }
@@ -85,15 +99,15 @@ export function BefaringOversikt({ ctx, b, obs, settFor, malingerFor, onVelg }) 
       const ps = tc.posisjonsskisse || {};
       if (!liste.length) continue;
       if (skisser.includes('skjaering-fasade')) {
-        for (const side of ['Venstre', 'Høyre']) {
+        for (const side of sideValg(tc)) {
           const pa = liste.filter((o) => o.sted && o.sted.side === side);
-          if (pa.length) deler.push(html`<div class="skisse-boks">${tegnSkjaeringFasade(A, F, { obs: pa, side, soner: ps.soner, onVelg })}</div>`);
+          if (pa.length) deler.push(html`<div class="skisse-boks">${tegnSkjaeringFasade(A, F, { obs: pa, side, soner: ps.soner, onVelg, typeNavn: tc.navn })}</div>`);
         }
       }
       if (skisser.includes('stereonett')) {
         for (const s of samletPerSide(liste, settFor, inn)) {
           deler.push(html`<div class="skisse-boks">
-            ${tegnStereonett(A, F, { sett: s.sprekker, flate: s.flate, analyse: s.analyse, tittel: `Samlet stereonett – ${s.side.toLowerCase()} side`, bredde: 300 })}
+            ${tegnStereonett(A, F, { sett: s.sprekker, flate: s.flate, analyse: s.analyse, tittel: `Samlet stereonett – ${sideEtikett(s.side).toLowerCase()}`, bredde: 300 })}
             ${s.analyse && html`<ul class="trafikklys">${kinematikkTekst(s.analyse).map((l) => html`<li><span class=${'prikk ' + l.status}></span><strong>${l.mekanisme}:</strong> ${l.tekst}</li>`)}</ul>`}
             ${s.ulikeFlater && html`<p class="hjelp">⚠︎ Skjæringsflaten varierer mye på denne siden – gjennomsnittet er brukt.</p>`}
             <p class="hjelp">${ANSVARSTEKST}</p>
@@ -110,6 +124,7 @@ export function BefaringOversikt({ ctx, b, obs, settFor, malingerFor, onVelg }) 
         const l = html`<${Lengdesnitt} obsListe=${liste} malingerFor=${malingerFor} />`;
         deler.push(l);
       }
+      deler.push(html`<${RosePanel} sett=${sprekkerFor(liste, settFor, inn)} tittel=${`Rosediagram – ${tc.navn.toLowerCase()}`} />`);
     }
   }
   return html`<div>

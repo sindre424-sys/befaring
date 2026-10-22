@@ -1,0 +1,458 @@
+{
+  "kilde": "Etter NGI: Bruk av Q-systemet (håndbok, 2015). Kontroller tekster og verdier mot gjeldende utgave.",
+  "parametere": {
+    "RQD": {
+      "navn": "RQD",
+      "beskrivelse": "Rock Quality Designation [%]. Ved RQD ≤ 10 brukes 10 i beregningen.",
+      "numerisk": true,
+      "min": 0,
+      "max": 100,
+      "valg": [
+        {
+          "kode": "A",
+          "tekst": "Svært dårlig (0–25)",
+          "verdi": 15,
+          "min": 0,
+          "max": 25
+        },
+        {
+          "kode": "B",
+          "tekst": "Dårlig (25–50)",
+          "verdi": 40,
+          "min": 25,
+          "max": 50
+        },
+        {
+          "kode": "C",
+          "tekst": "Middels (50–75)",
+          "verdi": 60,
+          "min": 50,
+          "max": 75
+        },
+        {
+          "kode": "D",
+          "tekst": "God (75–90)",
+          "verdi": 85,
+          "min": 75,
+          "max": 90
+        },
+        {
+          "kode": "E",
+          "tekst": "Svært god (90–100)",
+          "verdi": 95,
+          "min": 90,
+          "max": 100
+        }
+      ]
+    },
+    "Jn": {
+      "navn": "Jn",
+      "beskrivelse": "Sprekkesettall. Bruk 3 × Jn i tunnelkryss og 2 × Jn ved påhugg.",
+      "valg": [
+        {
+          "kode": "A",
+          "tekst": "Massivt, ingen eller få sprekker",
+          "verdi": 1,
+          "min": 0.5,
+          "max": 1
+        },
+        {
+          "kode": "B",
+          "tekst": "Ett sprekkesett",
+          "verdi": 2
+        },
+        {
+          "kode": "C",
+          "tekst": "Ett sprekkesett og tilfeldige sprekker",
+          "verdi": 3
+        },
+        {
+          "kode": "D",
+          "tekst": "To sprekkesett",
+          "verdi": 4
+        },
+        {
+          "kode": "E",
+          "tekst": "To sprekkesett og tilfeldige sprekker",
+          "verdi": 6
+        },
+        {
+          "kode": "F",
+          "tekst": "Tre sprekkesett",
+          "verdi": 9
+        },
+        {
+          "kode": "G",
+          "tekst": "Tre sprekkesett og tilfeldige sprekker",
+          "verdi": 12
+        },
+        {
+          "kode": "H",
+          "tekst": "Fire eller flere sprekkesett, sterkt oppsprukket, «sukkerbit»",
+          "verdi": 15
+        },
+        {
+          "kode": "J",
+          "tekst": "Knust berg, jordliknende",
+          "verdi": 20
+        }
+      ]
+    },
+    "Jr": {
+      "navn": "Jr",
+      "beskrivelse": "Sprekkeruhet for det mest ugunstige sprekkesettet. Legg til 1,0 når midlere sprekkeavstand for settet er over 3 m.",
+      "valg": [
+        {
+          "kode": "A",
+          "tekst": "Diskontinuerlige sprekker",
+          "verdi": 4
+        },
+        {
+          "kode": "B",
+          "tekst": "Ru eller uregelmessig, bølget",
+          "verdi": 3
+        },
+        {
+          "kode": "C",
+          "tekst": "Glatt, bølget",
+          "verdi": 2
+        },
+        {
+          "kode": "D",
+          "tekst": "Speilblank (slickensided), bølget",
+          "verdi": 1.5
+        },
+        {
+          "kode": "E",
+          "tekst": "Ru eller uregelmessig, plan",
+          "verdi": 1.5
+        },
+        {
+          "kode": "F",
+          "tekst": "Glatt, plan",
+          "verdi": 1.0
+        },
+        {
+          "kode": "G",
+          "tekst": "Speilblank (slickensided), plan",
+          "verdi": 0.5
+        },
+        {
+          "kode": "H",
+          "tekst": "Ingen bergkontakt: sone med leirmineraler som hindrer kontakt mellom sprekkeflatene",
+          "verdi": 1.0
+        }
+      ]
+    },
+    "Ja": {
+      "navn": "Ja",
+      "beskrivelse": "Sprekkefylling og omvandling for det mest ugunstige sprekkesettet.",
+      "valg": [
+        {
+          "kode": "A",
+          "tekst": "Tett sammenvokst, hard, ikke-oppbløtbar, impermeabel fylling (kvarts, epidot)",
+          "verdi": 0.75,
+          "gruppe": "Kontakt mellom sprekkeflatene"
+        },
+        {
+          "kode": "B",
+          "tekst": "Uomvandlede sprekkeflater, bare overflateflekker",
+          "verdi": 1,
+          "gruppe": "Kontakt mellom sprekkeflatene"
+        },
+        {
+          "kode": "C",
+          "tekst": "Lett omvandlede sprekkeflater, ikke-oppbløtbart belegg, sandpartikler, leirfritt oppknust berg",
+          "verdi": 2,
+          "gruppe": "Kontakt mellom sprekkeflatene"
+        },
+        {
+          "kode": "D",
+          "tekst": "Siltig eller sandig leirbelegg, liten leirfraksjon (ikke-oppbløtbar)",
+          "verdi": 3,
+          "gruppe": "Kontakt mellom sprekkeflatene"
+        },
+        {
+          "kode": "E",
+          "tekst": "Oppbløtbare leirmineraler med lav friksjon (kaolinitt, glimmer, kloritt, talk, gips, grafitt), små mengder svelleleire",
+          "verdi": 4,
+          "gruppe": "Kontakt mellom sprekkeflatene"
+        },
+        {
+          "kode": "F",
+          "tekst": "Sandpartikler, leirfritt oppknust berg",
+          "verdi": 4,
+          "gruppe": "Kontakt før 10 cm skjærforskyvning (tynn fylling)"
+        },
+        {
+          "kode": "G",
+          "tekst": "Sterkt overkonsolidert, ikke-oppbløtbar leirfylling (sammenhengende < 5 mm)",
+          "verdi": 6,
+          "gruppe": "Kontakt før 10 cm skjærforskyvning (tynn fylling)"
+        },
+        {
+          "kode": "H",
+          "tekst": "Middels eller lavt overkonsolidert, oppbløtbar leirfylling (sammenhengende < 5 mm)",
+          "verdi": 8,
+          "gruppe": "Kontakt før 10 cm skjærforskyvning (tynn fylling)"
+        },
+        {
+          "kode": "J",
+          "tekst": "Svelleleire (montmorillonitt) (sammenhengende < 5 mm)",
+          "verdi": 10,
+          "min": 8,
+          "max": 12,
+          "gruppe": "Kontakt før 10 cm skjærforskyvning (tynn fylling)"
+        },
+        {
+          "kode": "K",
+          "tekst": "Soner med oppknust berg, sterkt overkonsolidert",
+          "verdi": 6,
+          "gruppe": "Ingen kontakt (tykk fylling)"
+        },
+        {
+          "kode": "L",
+          "tekst": "Soner med leire, middels eller lavt overkonsolidert, oppbløtbar",
+          "verdi": 8,
+          "gruppe": "Ingen kontakt (tykk fylling)"
+        },
+        {
+          "kode": "M",
+          "tekst": "Soner med svelleleire",
+          "verdi": 10,
+          "min": 8,
+          "max": 12,
+          "gruppe": "Ingen kontakt (tykk fylling)"
+        },
+        {
+          "kode": "N",
+          "tekst": "Tykke, sammenhengende leirsoner, sterkt overkonsolidert",
+          "verdi": 10,
+          "gruppe": "Ingen kontakt (tykk fylling)"
+        },
+        {
+          "kode": "O",
+          "tekst": "Tykke, sammenhengende leirsoner, middels til lavt overkonsolidert",
+          "verdi": 13,
+          "gruppe": "Ingen kontakt (tykk fylling)"
+        },
+        {
+          "kode": "P",
+          "tekst": "Tykke, sammenhengende soner med svelleleire",
+          "verdi": 16,
+          "min": 13,
+          "max": 20,
+          "gruppe": "Ingen kontakt (tykk fylling)"
+        }
+      ]
+    },
+    "Jw": {
+      "navn": "Jw",
+      "beskrivelse": "Sprekkevannsfaktor.",
+      "valg": [
+        {
+          "kode": "A",
+          "tekst": "Tørt eller lite innsig (fuktig eller enkelte drypp)",
+          "verdi": 1.0
+        },
+        {
+          "kode": "B",
+          "tekst": "Middels innsig, tidvis utvasking av sprekkefylling (mange drypp, «regn»)",
+          "verdi": 0.66
+        },
+        {
+          "kode": "C",
+          "tekst": "Stråler eller høyt trykk i kompetent berg med åpne sprekker",
+          "verdi": 0.5
+        },
+        {
+          "kode": "D",
+          "tekst": "Stort innsig eller høyt trykk, betydelig utvasking av fylling",
+          "verdi": 0.33
+        },
+        {
+          "kode": "E",
+          "tekst": "Eksepsjonelt stort innsig eller trykk som avtar med tiden, utvasking og mulig ras",
+          "verdi": 0.15,
+          "min": 0.1,
+          "max": 0.2
+        },
+        {
+          "kode": "F",
+          "tekst": "Eksepsjonelt stort innsig eller trykk uten merkbar avtakning",
+          "verdi": 0.075,
+          "min": 0.05,
+          "max": 0.1
+        }
+      ]
+    },
+    "SRF": {
+      "navn": "SRF",
+      "beskrivelse": "Spenningsfaktor (Stress Reduction Factor).",
+      "valg": [
+        {
+          "kode": "A",
+          "tekst": "Flere svakhetssoner med leire eller kjemisk nedbrutt berg innen kort strekning, svært løst sidefjell (alle dyp)",
+          "verdi": 10,
+          "gruppe": "Svakhetssoner som krysser tunnelen"
+        },
+        {
+          "kode": "B",
+          "tekst": "Flere skjærsoner innen kort strekning i kompetent, leirfritt berg med løst sidefjell (alle dyp)",
+          "verdi": 7.5,
+          "gruppe": "Svakhetssoner som krysser tunnelen"
+        },
+        {
+          "kode": "C",
+          "tekst": "Enkelt svakhetssone med eller uten leire/kjemisk nedbrutt berg (dyp ≤ 50 m)",
+          "verdi": 5,
+          "gruppe": "Svakhetssoner som krysser tunnelen"
+        },
+        {
+          "kode": "D",
+          "tekst": "Løse, åpne sprekker, sterkt oppsprukket eller «sukkerbit» (alle dyp)",
+          "verdi": 5,
+          "gruppe": "Svakhetssoner som krysser tunnelen"
+        },
+        {
+          "kode": "E",
+          "tekst": "Enkelt svakhetssone med eller uten leire/kjemisk nedbrutt berg (dyp > 50 m)",
+          "verdi": 2.5,
+          "gruppe": "Svakhetssoner som krysser tunnelen"
+        },
+        {
+          "kode": "F",
+          "tekst": "Lave spenninger, nær overflaten, åpne sprekker",
+          "verdi": 2.5,
+          "gruppe": "Kompetent, hovedsakelig massivt berg – spenningsproblemer"
+        },
+        {
+          "kode": "G",
+          "tekst": "Middels spenninger, gunstige spenningsforhold",
+          "verdi": 1,
+          "gruppe": "Kompetent, hovedsakelig massivt berg – spenningsproblemer"
+        },
+        {
+          "kode": "H",
+          "tekst": "Høye spenninger, svært tett struktur (oftest gunstig for stabiliteten)",
+          "verdi": 1,
+          "min": 0.5,
+          "max": 2,
+          "gruppe": "Kompetent, hovedsakelig massivt berg – spenningsproblemer"
+        },
+        {
+          "kode": "J",
+          "tekst": "Moderat avskalling og/eller sprakeberg etter > 1 time i massivt berg",
+          "verdi": 25,
+          "min": 5,
+          "max": 50,
+          "gruppe": "Kompetent, hovedsakelig massivt berg – spenningsproblemer"
+        },
+        {
+          "kode": "K",
+          "tekst": "Avskalling eller bergslag etter noen minutter i massivt berg",
+          "verdi": 100,
+          "min": 50,
+          "max": 200,
+          "gruppe": "Kompetent, hovedsakelig massivt berg – spenningsproblemer"
+        },
+        {
+          "kode": "L",
+          "tekst": "Kraftig bergslag og umiddelbare dynamiske deformasjoner i massivt berg",
+          "verdi": 300,
+          "min": 200,
+          "max": 400,
+          "gruppe": "Kompetent, hovedsakelig massivt berg – spenningsproblemer"
+        },
+        {
+          "kode": "M",
+          "tekst": "Mildt skvisende bergtrykk",
+          "verdi": 7.5,
+          "min": 5,
+          "max": 10,
+          "gruppe": "Skvisende berg"
+        },
+        {
+          "kode": "N",
+          "tekst": "Kraftig skvisende bergtrykk",
+          "verdi": 15,
+          "min": 10,
+          "max": 20,
+          "gruppe": "Skvisende berg"
+        },
+        {
+          "kode": "O",
+          "tekst": "Mildt svellende bergtrykk",
+          "verdi": 7.5,
+          "min": 5,
+          "max": 10,
+          "gruppe": "Svellende berg"
+        },
+        {
+          "kode": "P",
+          "tekst": "Kraftig svellende bergtrykk",
+          "verdi": 12.5,
+          "min": 10,
+          "max": 15,
+          "gruppe": "Svellende berg"
+        }
+      ]
+    }
+  },
+  "klasser": [
+    {
+      "min": 0,
+      "max": 0.01,
+      "navn": "Eksepsjonelt dårlig",
+      "farge": "rod"
+    },
+    {
+      "min": 0.01,
+      "max": 0.1,
+      "navn": "Ekstremt dårlig",
+      "farge": "rod"
+    },
+    {
+      "min": 0.1,
+      "max": 1,
+      "navn": "Meget dårlig",
+      "farge": "rod"
+    },
+    {
+      "min": 1,
+      "max": 4,
+      "navn": "Dårlig",
+      "farge": "gul"
+    },
+    {
+      "min": 4,
+      "max": 10,
+      "navn": "Middels",
+      "farge": "gul"
+    },
+    {
+      "min": 10,
+      "max": 40,
+      "navn": "God",
+      "farge": "gronn"
+    },
+    {
+      "min": 40,
+      "max": 100,
+      "navn": "Meget god",
+      "farge": "gronn"
+    },
+    {
+      "min": 100,
+      "max": 400,
+      "navn": "Ekstremt god",
+      "farge": "gronn"
+    },
+    {
+      "min": 400,
+      "max": 1000000000.0,
+      "navn": "Eksepsjonelt god",
+      "farge": "gronn"
+    }
+  ]
+}

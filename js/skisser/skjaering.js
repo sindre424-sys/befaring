@@ -75,7 +75,11 @@ function klipp(segmenter, y0, y1) {
 /**
  * Tverrsnitt. side 'Høyre' tegnes med vegen til venstre og skjæringen til høyre; 'Venstre' speilvendes.
  */
-export function tegnSkjaeringSnitt(S, f, { geometri, side = 'Høyre', valgte = [], onVelg = null, soner = SKJAERING_SONER, visMal = true, bredde = 340 }) {
+export const sideEtikett = (side) => (['Venstre', 'Høyre'].includes(side) ? `${side} side` : `${side}vegg`);
+
+export function tegnSkjaeringSnitt(S, f, { geometri, side = 'Høyre', valgte = [], onVelg = null, soner = SKJAERING_SONER, visMal = true, bredde = 340, tekster = {} }) {
+  const bunnTekst = tekster.bunn || 'veg';
+  const groftTekst = tekster.groft || 'grøft';
   const n = { ...SKJAERING_SONER, ...(soner || {}) };
   const g = skjaeringGeometri(geometri);
   const W = 340;
@@ -178,7 +182,7 @@ export function tegnSkjaeringSnitt(S, f, { geometri, side = 'Høyre', valgte = [
     const [g1x] = P([vei, 0]);
     mal.push(S('line', { x1: g1x, y1: fy + 16, x2: fx, y2: fy + 16, stroke: f.tekst, 'stroke-width': 1 }));
     mal.push(S('text', { x: (g1x + fx) / 2, y: fy + 28, 'text-anchor': 'middle', 'font-size': 10.5, fill: f.tekst, stroke: f.luft, 'stroke-width': 3, 'paint-order': 'stroke' },
-      `grøft ${o.groftbredde !== undefined && o.groftbredde !== null ? fmtNum(o.groftbredde, 1) + ' m' : '?'}`));
+      `${groftTekst} ${o.groftbredde !== undefined && o.groftbredde !== null ? fmtNum(o.groftbredde, 1) + ' m' : '?'}`));
     if (o.losmasse !== undefined && o.losmasse !== null) {
       mal.push(S('text', { x: (bx + kx) / 2 - forskyv * 10, y: (by + ky) / 2 - 8, 'text-anchor': speil ? 'start' : 'end', 'font-size': 10.5, fill: f.tekst, stroke: f.luft, 'stroke-width': 3, 'paint-order': 'stroke' }, `løsmasse ${fmtNum(o.losmasse, 1)} m`));
     }
@@ -193,8 +197,8 @@ export function tegnSkjaeringSnitt(S, f, { geometri, side = 'Høyre', valgte = [
     S('path', { d: poly(losmasse.map(P)), fill: f.losmasse, stroke: f.bergKant, 'stroke-width': 0.8 }),
     S('polyline', { points: terrengLinje.map(P).map((q) => q.join(',')).join(' '), fill: 'none', stroke: f.tekst, 'stroke-width': 2 }),
     S('line', { x1: X(0), y1: Y(0), x2: X(vei), y2: Y(0), stroke: f.vei, 'stroke-width': 5 }),
-    S('text', { x: X(vei / 2), y: Y(0) + 16, 'text-anchor': 'middle', 'font-size': 10, fill: f.tekst2 }, 'veg'),
-    S('text', { x: speil ? W - 8 : 8, y: 16, 'text-anchor': speil ? 'end' : 'start', 'font-size': 12, 'font-weight': 700, fill: f.tekst2 }, `${side} side`),
+    S('text', { x: X(vei / 2), y: Y(0) + 16, 'text-anchor': 'middle', 'font-size': 10, fill: f.tekst2 }, bunnTekst),
+    S('text', { x: speil ? W - 8 : 8, y: 16, 'text-anchor': speil ? 'end' : 'start', 'font-size': 12, 'font-weight': 700, fill: f.tekst2 }, sideEtikett(side)),
     z('groft', band(groftPkt, T), (groftPkt[0][0] + groftPkt[2][0]) / 2, groftPkt[0][1] - 24),
     z('fot', band([P([fot[0] - 0.6, -1]), P(fot), ...klipp(flate, fot[1], fotH).map(([, b]) => P(b))], T), fx + forskyv * 40, fy + 2),
     z('nedre', linjer(nedre), nx + forskyv * 52, ny + 4),
@@ -208,7 +212,7 @@ export function tegnSkjaeringSnitt(S, f, { geometri, side = 'Høyre', valgte = [
 }
 
 /** Fasadeskisse: skjæringen sett forfra, profil på x-aksen og høyde på y-aksen. */
-export function tegnSkjaeringFasade(S, f, { obs, side, soner = SKJAERING_SONER, bredde = 340, onVelg = null }) {
+export function tegnSkjaeringFasade(S, f, { obs, side, soner = SKJAERING_SONER, bredde = 340, onVelg = null, typeNavn = 'Skjæring' }) {
   const n = { ...SKJAERING_SONER, ...(soner || {}) };
   const andelFor = {};
   for (const [k, v] of Object.entries(n)) andelFor[v] = HOYDE_ANDEL[k];
@@ -221,7 +225,7 @@ export function tegnSkjaeringFasade(S, f, { obs, side, soner = SKJAERING_SONER, 
   const med = obs.filter((o) => o.profilFra !== null && o.profilFra !== undefined || o.profilTil !== null && o.profilTil !== undefined);
   if (!med.length) {
     return S('svg', { viewBox: `0 0 ${W} 60`, width: bredde, height: (bredde * 60) / W, class: 'skisse', 'font-family': f.font },
-      S('text', { x: W / 2, y: 34, 'text-anchor': 'middle', 'font-size': 12, fill: f.tekst2 }, `${side} side: ingen observasjoner med profil`));
+      S('text', { x: W / 2, y: 34, 'text-anchor': 'middle', 'font-size': 12, fill: f.tekst2 }, `${sideEtikett(side)}: ingen observasjoner med profil`));
   }
   const spenn = med.map((o) => {
     const a = o.profilFra ?? o.profilTil;
@@ -289,7 +293,7 @@ export function tegnSkjaeringFasade(S, f, { obs, side, soner = SKJAERING_SONER, 
     )),
     S('text', { x: W - mr, y: HPX - 4, 'text-anchor': 'end', 'font-size': 9.5, fill: f.tekst2 }, 'profil →'),
     S('text', { x: 4, y: Y(stdH) + 4, 'font-size': 9.5, fill: f.tekst2 }, `${fmtNum(stdH, 0)} m`),
-    S('text', { x: ml, y: 15, 'font-size': 11.5, 'font-weight': 700, fill: f.tekst }, `Skjæring – ${side.toLowerCase()} side (oppriss)`),
+    S('text', { x: ml, y: 15, 'font-size': 11.5, 'font-weight': 700, fill: f.tekst }, `${typeNavn} – ${sideEtikett(side).toLowerCase()} (oppriss)`),
     bokser,
   );
 }

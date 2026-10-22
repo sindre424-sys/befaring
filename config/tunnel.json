@@ -120,6 +120,11 @@
   ],
   "geometri": null,
   "skisser": [
-    "tunnel-tverrsnitt"
-  ]
+    "tunnel-tverrsnitt",
+    "rosediagram"
+  ],
+  "qsystem": {
+    "jnFaktor": 1,
+    "jnFaktorTekst": "Normalt"
+  }
 }

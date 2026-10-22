@@ -245,6 +245,7 @@
   "skisser": [
     "skjaering-snitt",
     "skjaering-fasade",
-    "stereonett"
+    "stereonett",
+    "rosediagram"
   ]
 }

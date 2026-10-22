@@ -1,0 +1,4 @@
+{
+  "beskrivelse": "Liste over objekttyper som følger med appen. Legg til en ny fil i config/ og navnet her for å få en ny standardtype.",
+  "typer": ["skjaering", "pahugg", "tunnel", "byggegrop"]
+}

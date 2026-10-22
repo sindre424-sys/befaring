@@ -51,6 +51,11 @@ export function samletPerSide(obsListe, settFor, inn) {
   }).filter((s) => s.sprekker.length || s.flate);
 }
 
+/** Alle sprekkesett (uten skjæringsflater) for en gruppe observasjoner – til rosediagram. */
+export function sprekkerFor(obsListe, settFor, inn) {
+  return obsListe.flatMap((o) => orienteringerForObs(o, settFor[o.id], inn.misvisning).sprekker);
+}
+
 const RANG = { rod: 3, gul: 2, gronn: 1 };
 /** Antall og verste alvorlighet per posisjon (til oversiktsskisser for tunnel og påhugg). */
 export function posisjonsOversikt(obsListe) {

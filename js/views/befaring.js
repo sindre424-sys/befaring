@@ -8,6 +8,7 @@ import { fmtDato, fmtDatoTid, toLocalInput, fromLocalInput, profilTekst, obsNr }
 import { nyObservasjon } from '../logikk.js';
 import { go } from '../router.js';
 import { BefaringOversikt } from '../skisser/komponenter.js';
+import { beregnQ, qTekst } from '../qsystem.js';
 
 /** Kort tekst for et observasjonskort, f.eks. «Observasjon 01 – Profil 920 · Skjæring H · 3 bilder». */
 export function obsTittel(o, ctx, antallBilder = 0) {
@@ -153,7 +154,7 @@ export function Befaring({ id }) {
           <${AlvorlighetPrikk} verdi=${o.alvorlighet} stor />
           <div class="kort-tekst">
             <div class="kort-tittel">${obsTittel(o, ctx, bilder[o.id])}</div>
-            <div class="kort-under">${[o.obsType, (o.posisjon || []).join(', ')].filter(Boolean).join(' · ') || 'Type ikke valgt'}</div>
+            <div class="kort-under">${[o.obsType, (o.posisjon || []).join(', '), o.q && typeCfg(ctx, o.objekttype).qsystem ? qTekst(beregnQ(o.q, ctx.config.qsystem, typeCfg(ctx, o.objekttype).qsystem.jnFaktor)) : ''].filter(Boolean).join(' · ') || 'Type ikke valgt'}</div>
             ${o.tekst && html`<div class="kort-under utdrag">${o.tekst}</div>`}
           </div>
           <${TypeIkon} ikon=${typeCfg(ctx, o.objekttype).ikon} size=${24} />
