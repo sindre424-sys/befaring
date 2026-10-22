@@ -14,6 +14,7 @@ import {
   nesteSettNavn, alvorlighetFraVurdering,
 } from '../logikk.js';
 import { go } from '../router.js';
+import { FotoSeksjon } from './foto.js';
 
 export function Observasjon({ id, ny }) {
   const ctx = useCtx();
@@ -78,6 +79,7 @@ export function Observasjon({ id, ny }) {
   };
 
   const slettMaling = async (m) => {
+    if (!(await bekreft(`Slette målingen «${m.type}»?`, { ok: 'Slett', fare: true }))) return;
     await softDelete('malinger', m.id);
     visMelding(`Måling «${m.type}» slettet.`, { angre: () => restore('malinger', m.id) });
   };
@@ -93,6 +95,7 @@ export function Observasjon({ id, ny }) {
     setNyttSettId(ny.id);
   };
   const slettSett = async (s) => {
+    if (!(await bekreft(`Slette sprekkesettet «${s.navn}»?`, { ok: 'Slett', fare: true }))) return;
     await softDelete('sprekkesett', s.id);
     visMelding(`Sprekkesett «${s.navn}» slettet.`, { angre: () => restore('sprekkesett', s.id) });
   };
@@ -192,9 +195,7 @@ export function Observasjon({ id, ny }) {
         <p class="hjelp">Format: ${inn.orienteringsformat === 'strok' ? 'strøk/fall (høyrehåndsregel)' : 'fall/fallretning'} – kan endres i Innstillinger.</p>
       <//>
 
-      <${Seksjon} tittel="Bilder">
-        <p class="hjelp">Kamera kommer i fase 2.</p>
-      <//>
+      <${FotoSeksjon} o=${o} />
 
       <${Seksjon} tittel="Vurdering">
         <${Select} label="Vurdering" value=${o.vurdering} options=${felles.vurderinger.map((v) => v.navn)} onChange=${settVurdering} />

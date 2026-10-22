@@ -6,6 +6,7 @@ import { Topp, Seksjon, TextField, visMelding, bekreft } from '../ui.js';
 import { uid, fmtDato, fmtDatoTid, obsNr, fmtNum, profilTekst } from '../util.js';
 import { orienteringTekst } from '../logikk.js';
 import { go } from '../router.js';
+import { Miniatyr } from '../bilder.js';
 
 export function Prosjekter() {
   const liste = useLive(async () => {
@@ -93,7 +94,11 @@ export function Papirkurv() {
         tekst=${`Observasjon ${obsNr(x.lopenr)} – ${profilTekst(x.profilFra, x.profilTil)} · ${typeCfg(ctx, x.objekttype).kortnavn}${data.bMap[x.befaringId] ? ' · ' + fmtDato(data.bMap[x.befaringId].start) : ''}`} />`)}<//>`}
       ${data.m.length > 0 && html`<${Seksjon} tittel="Målinger">${data.m.map((x) => html`<${Rad} tabell="malinger" x=${x} tekst=${`${x.type}: ${fmtNum(x.verdi)} ${x.enhet} · ${obsNavn(x.obsId)}`} />`)}<//>`}
       ${data.s.length > 0 && html`<${Seksjon} tittel="Sprekkesett">${data.s.map((x) => html`<${Rad} tabell="sprekkesett" x=${x} tekst=${`${x.navn} ${orienteringTekst(x)} · ${obsNavn(x.obsId)}`} />`)}<//>`}
-      ${data.f.length > 0 && html`<${Seksjon} tittel="Bilder">${data.f.map((x) => html`<${Rad} tabell="fotos" x=${x} tekst=${`Bilde · ${obsNavn(x.obsId)}`} />`)}<//>`}
+      ${data.f.length > 0 && html`<${Seksjon} tittel="Bilder">${data.f.map((x) => html`<div class="kort">
+        <${Miniatyr} foto=${x} klasse="miniatyr liten" onClick=${() => {}} />
+        <div class="kort-tekst"><div class="kort-tittel">${x.kommentar || 'Bilde'} · ${obsNavn(x.obsId)}</div><div class="kort-under">Slettet ${fmtDatoTid(x.slettet)}</div></div>
+        <button class="knapp" onClick=${async () => { await restore('fotos', x.id); visMelding('Gjenopprettet.'); }}>Gjenopprett</button>
+      </div>`)}<//>`}
       ${data.p.length > 0 && html`<${Seksjon} tittel="Prosjekter">${data.p.map((x) => html`<${Rad} tabell="prosjekter" x=${x} tekst=${x.navn} />`)}<//>`}
     </main>
   `;

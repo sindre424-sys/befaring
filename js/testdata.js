@@ -2,6 +2,7 @@
 // Alle rader merkes test: true, slik at de kan fjernes uten å røre egne data.
 import { db } from './db.js';
 import { uid } from './util.js';
+import { lagTestbilde } from './bilder.js';
 
 export async function harTestdata() {
   return (await db.befaringer.filter((b) => !!b.test).count()) > 0;
@@ -30,7 +31,7 @@ export async function lastInnTestdata() {
       objekttype: 'skjaering', profilFra: 820, profilTil: 850, sted: { side: 'Høyre', pall: 1 },
       posisjon: ['Skjæringsflate øvre del'], obsType: 'Løse blokker', status: ['Maskinrensk utført'],
       tekst: 'Enkelte løse blokker i øvre del etter maskinrensk. Blokkene ligger på J1-flater.',
-      vurdering: 'Ekstra rensk nødvendig', alvorlighet: 'gul', tiltak: 'Spettrensk øvre del før åpning for trafikk.',
+      vurdering: 'Ekstra rensk nødvendig', alvorlighet: 'gul', tiltak: 'Spettrensk øvre del før åpning for trafikk.', bilder: ['Løse blokker i øvre del'],
       geometri: { hoyde: 14, helning: 80, antallPaller: 1, pallbredde: 4, groftbredde: 4, losmasse: 2, fallretning: 270 },
       malinger: [['Blokkstørrelse', 0.5, 'm³', 'Største blokk'], ['Skjæringshøyde', 14, 'm', '']],
       sett: [],
@@ -41,7 +42,7 @@ export async function lastInnTestdata() {
       status: ['Maskinrensk utført', 'Bolting utført'],
       tekst: 'Gjennomgående J1 som faller ut av skjæringen med ca. 50°. Tydelig glideflate med kalsittbelegg. J2 og J3 danner kiler.',
       vurdering: 'Ny/supplerende sikring nødvendig', alvorlighet: 'rod',
-      tiltak: 'Systematisk bolting 4 m c/c 2 m i sone 850–900. Vurder nett i øvre del.',
+      tiltak: 'Systematisk bolting 4 m c/c 2 m i sone 850–900. Vurder nett i øvre del.', bilder: ['Oversikt over glideflate J1', 'Detalj av kalsittbelegg', 'Kile mellom J2 og J3'],
       geometri: { hoyde: 15, helning: 80, antallPaller: 1, pallbredde: 4, groftbredde: 4, losmasse: 1.5, fallretning: 270 },
       malinger: [['Sprekkåpning', 15, 'mm', 'J1, åpen i topp'], ['Skjæringshelning', 80, '°', ''], ['Boltelengde', 4, 'm', 'Eksisterende']],
       sett: [
@@ -75,7 +76,7 @@ export async function lastInnTestdata() {
       posisjon: ['Heng over påhugg', 'Påhuggsflate/front'], obsType: 'Tynn bergoverdekning',
       status: ['Forbolting/spiling utført', 'Sprøytebetongbuer utført'],
       tekst: 'Bergoverdekning ca. 4,5 m over heng ved påhugget. Løsmasser over berg. Spiling og buer er utført.',
-      vurdering: 'Følges opp', alvorlighet: 'gul', tiltak: 'Kontroller buer og spiling ved neste befaring.',
+      vurdering: 'Følges opp', alvorlighet: 'gul', tiltak: 'Kontroller buer og spiling ved neste befaring.', bilder: ['Påhuggsflate med buer', 'Løsmasser over påhugget'],
       malinger: [['Bergoverdekning', 4.5, 'm', ''], ['Løsmassetykkelse', 2, 'm', ''], ['Spilingslengde', 6, 'm', ''],
         ['Antall spiler', 25, 'stk', ''], ['Buesenteravstand', 1.5, 'm', '']],
       sett: [['J1', 55, 350, 40, 5, '', 'Parallell med front']],
@@ -92,7 +93,7 @@ export async function lastInnTestdata() {
       objekttype: 'tunnel', profilFra: 975, profilTil: 990, sted: {},
       posisjon: ['Heng', 'Vederlag høyre'], obsType: 'Svakhetssone/leire', status: ['Bolting utført', 'Sprøytebetong utført'],
       tekst: 'Svakhetssone ca. 1 m bred med svelleleire. Krysser tunnelen skrått.',
-      vurdering: 'Ny/supplerende sikring nødvendig', alvorlighet: 'rod', tiltak: 'Armerte sprøytebetongbuer c/c 1,5 m. Ta leireprøve.',
+      vurdering: 'Ny/supplerende sikring nødvendig', alvorlighet: 'rod', tiltak: 'Armerte sprøytebetongbuer c/c 1,5 m. Ta leireprøve.', bilder: ['Svakhetssone i heng'],
       malinger: [['Sprøytebetongtykkelse', 8, 'cm', ''], ['Boltelengde', 4, 'm', ''], ['Antall bolter', 12, 'stk', '']],
       sett: [['Svakhetssone', 75, 120, null, 50, 'Leire 5–20 cm', '']],
     },
@@ -108,7 +109,7 @@ export async function lastInnTestdata() {
       objekttype: 'tunnel', profilFra: 1100, profilTil: 1130, sted: {},
       posisjon: ['Vegg venstre', 'Såle'], obsType: 'Vann/lekkasje', status: [],
       tekst: 'Drypp og sig fra vegg venstre. Vann samles på sålen.',
-      vurdering: 'Følges opp', alvorlighet: 'gul', tiltak: 'Vurder injeksjon eller vann- og frostsikring.',
+      vurdering: 'Følges opp', alvorlighet: 'gul', tiltak: 'Vurder injeksjon eller vann- og frostsikring.', bilder: ['Vannsig fra vegg venstre'],
       malinger: [['Vannlekkasje', 12, 'l/min', 'Målt med bøtte']],
       sett: [],
     },
@@ -127,7 +128,7 @@ export async function lastInnTestdata() {
     nr++;
     const tid = start + nr * 12 * 60 * 1000;
     const obsId = uid();
-    const { malinger, sett, ...felt } = o;
+    const { malinger, sett, bilder = [], ...felt } = o;
     await db.observasjoner.add({
       id: obsId, befaringId, lopenr: nr, tid, gps: null, gpsAv: false, omrade: 'Testdalen',
       alvorlighetManuell: false, geometri: {}, ...felt, created: tid, updated: tid, slettet: null, test: true,
@@ -140,6 +141,16 @@ export async function lastInnTestdata() {
       await db.sprekkesett.add({
         id: uid(), obsId, befaringId, navn, fall, fallretning, avstand, utholdenhet, ruhet, kommentar, misvisning: 0,
         created: tid + ++k, updated: tid, slettet: null, test: true,
+      });
+    }
+    let j = 0;
+    for (const kommentar of bilder) {
+      j++;
+      const b = await lagTestbilde(`Obs. ${String(nr).padStart(2, '0')} – ${kommentar}`, nr * 10 + j);
+      await db.fotos.add({
+        id: uid(), obsId, befaringId, blob: b.blob, miniatyr: b.miniatyr, bredde: b.bredde, hoyde: b.hoyde,
+        type: 'image/jpeg', storrelse: b.blob.size, komprimert: true, fraKamera: true, tid: tid + j * 60000,
+        gps: null, sted: null, kommentar, created: tid + ++k, updated: tid, slettet: null, test: true,
       });
     }
   }

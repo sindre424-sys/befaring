@@ -1,6 +1,6 @@
 // Service worker: lagrer hele appen lokalt slik at den virker 100 % uten nett.
 // VIKTIG: Øk VERSJON ved hver endring, ellers får ikke telefonen den nye versjonen.
-const VERSJON = '0.1.0';
+const VERSJON = '0.2.0';
 const CACHE = 'befaring-' + VERSJON;
 
 const FILER = [
@@ -28,6 +28,8 @@ const FILER = [
   'js/logikk.js',
   'js/testdata.js',
   'js/versjon.js',
+  'js/bilder.js',
+  'js/views/foto.js',
   'js/views/start.js',
   'js/views/ny-befaring.js',
   'js/views/befaring.js',

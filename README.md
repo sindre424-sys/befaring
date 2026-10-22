@@ -60,7 +60,22 @@ Appen er en nettapp (PWA) som installeres fra Safari og virker helt uten nett.
 - [ ] **Mørk/lys modus:** Innstillinger → Tema.
 - [ ] Når du er ferdig: Innstillinger → «Fjern testdata». Bare testdataene fjernes.
 
-> Fase 1 har ennå ikke eksport eller sikkerhetskopi (kommer i fase 3). Ikke bruk appen til ekte befaringer før det er på plass.
+## Teste fase 2 (bilder) på iPhone
+
+- [ ] **Oppdater:** Åpne appen. Trykk det gule feltet «Ny versjon er klar». Nederst i Innstillinger skal det stå versjon 0.2.0.
+- [ ] **Testbilder:** Innstillinger → «Fjern testdata» → «Last inn testdata». Observasjon 01, 02, 05, 07 og 09 har nå fiktive bilder.
+- [ ] **Ta bilde:** Åpne en observasjon → «📷 Ta bilde». Kameraet skal åpne seg direkte. Etter bildet skal du se
+  «✓ Bilde lagret», et kommentarfelt og «📷 Ta nytt bilde».
+- [ ] **Flere bilder på rad:** Trykk «Ta nytt bilde» noen ganger. Telleren «Bilder (n)» og «· n bilder» på kortet skal øke.
+- [ ] **Fra Bilder:** «🖼 Fra Bilder» → velg flere bilder samtidig.
+- [ ] **Stående og liggende:** Ta ett bilde av hver. Begge skal vises riktig vei.
+- [ ] **Full størrelse:** Trykk på et bilde. Bla med «Forrige/Neste». Prøv å zoome med to fingre.
+- [ ] **Sted/profil:** Står som «(auto)» og følger profil, side og posisjon i observasjonen. Trykk «Endre» for å skrive egen tekst.
+- [ ] **Sletting:** Slett et bilde (bekreftelse + «Angre»). Gjenopprett et bilde fra Papirkurv.
+- [ ] **Tunnel/offline:** Flymodus → ta bilde. Det skal fungere uten nett (GPS kan mangle, det er normalt).
+- [ ] **Lagring:** Innstillinger → Lagring viser hvor mye plass bildene bruker (ca. 0,3–0,8 MB per bilde).
+
+> Fase 1 og 2 har ennå ikke eksport eller sikkerhetskopi (kommer i fase 3). Ikke bruk appen til ekte befaringer før det er på plass.
 
 ## Oppbygging (for den som vil se i koden)
 
@@ -70,7 +85,9 @@ Appen er en nettapp (PWA) som installeres fra Safari og virker helt uten nett.
 | `js/db.js` | Lokal database (IndexedDB via Dexie) |
 | `js/config.js` | Slår sammen standardoppsett med endringer gjort i Innstillinger |
 | `js/views/` | Skjermene |
-| `js/testdata.js` | Fiktive testdata |
+| `js/bilder.js` | Komprimering og lagring av bilder |
+| `js/views/foto.js` | Bildedelen i observasjonen |
+| `js/testdata.js` | Fiktive testdata (også fiktive bilder) |
 | `sw.js` | Offline-støtte. Lista `FILER` må inneholde alle filer appen bruker |
 | `vendor/` | Lokale kopier av Preact/htm og Dexie (ingen nettverk ved kjøring) |
 | `tools/lag-ikoner.py` | Lager app-ikonene |
