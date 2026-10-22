@@ -1,0 +1,23 @@
+{
+  "formal": [
+    "Rutinemessig oppfølging",
+    "Kontroll av sikring",
+    "Kartlegging",
+    "Akutt hendelse",
+    "Annet"
+  ],
+  "vurderinger": [
+    { "navn": "Ingen tiltak", "alvorlighet": "gronn" },
+    { "navn": "Følges opp", "alvorlighet": "gul" },
+    { "navn": "Ekstra rensk nødvendig", "alvorlighet": "gul" },
+    { "navn": "Ny/supplerende sikring nødvendig", "alvorlighet": "rod" },
+    { "navn": "Avvik – må meldes", "alvorlighet": "rod" }
+  ],
+  "sprekkesettnavn": [
+    "J1", "J2", "J3", "J4", "Lagdeling", "Foliasjon", "Skjæringsflate", "Svakhetssone"
+  ],
+  "sprekkesettFelt": {
+    "avstandEnhet": "cm",
+    "utholdenhetEnhet": "m"
+  }
+}

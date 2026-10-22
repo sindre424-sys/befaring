@@ -1,0 +1,11 @@
+# Sikkerhet: eksporter og sikkerhetskopier skal ALDRI legges i det offentlige repoet.
+*.xlsx
+*.docx
+*.pdf
+*.zip
+*.csv
+*.jpg
+*.jpeg
+*.heic
+.DS_Store
+.claude/
