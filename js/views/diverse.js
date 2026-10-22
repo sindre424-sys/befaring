@@ -103,21 +103,3 @@ export function Papirkurv() {
     </main>
   `;
 }
-
-export function Eksport({ id }) {
-  const b = useLive(() => db.befaringer.get(id), [id]);
-  if (!b) return null;
-  return html`
-    <${Topp} tittel="Eksport" undertittel=${'Befaring ' + fmtDato(b.start)} tilbake=${'befaring/' + id} />
-    <main class="innhold">
-      <div class="info-boks">Befaringen er ${b.status === 'avsluttet' ? 'avsluttet' : 'åpen'}.</div>
-      <${Seksjon} tittel="Eksport">
-        <p>Excel, Word, PDF, Dips-CSV og sikkerhetskopi kommer i fase 3.</p>
-      <//>
-      <div class="knapperad vertikal">
-        ${b.status === 'avsluttet' && html`<button class="knapp stor" onClick=${async () => { await patch('befaringer', id, { status: 'pagar' }); go('befaring/' + id); }}>Gjenåpne befaringen</button>`}
-        <a class="knapp stor" href="#/">Til startsiden</a>
-      </div>
-    </main>
-  `;
-}

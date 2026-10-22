@@ -10,7 +10,8 @@ import { Befaring } from './views/befaring.js';
 import { Observasjon } from './views/observasjon.js';
 import { Innstillinger } from './views/innstillinger.js';
 import { TypeRedigerer, FellesRedigerer } from './views/config-editor.js';
-import { Prosjekter, Prosjekt, Papirkurv, Eksport } from './views/diverse.js';
+import { Prosjekter, Prosjekt, Papirkurv } from './views/diverse.js';
+import { Eksport } from './views/eksport.js';
 
 function Side({ rute }) {
   const [a, b, c] = rute.deler;

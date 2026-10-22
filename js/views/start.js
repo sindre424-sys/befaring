@@ -4,6 +4,7 @@ import { useCtx, typeCfg } from '../config.js';
 import { Topp, AlvorlighetPrikk } from '../ui.js';
 import { TypeIkon } from '../ikoner.js';
 import { fmtDato, fmtTid, isStandalone } from '../util.js';
+import { trengerSikkerhetskopi } from '../sikkerhetskopi.js';
 
 export function Start() {
   const ctx = useCtx();
@@ -21,7 +22,8 @@ export function Start() {
   }, []);
 
   const [lagring, setLagring] = useState(null);
-  useEffect(() => { lagringsInfo().then(setLagring); }, []);
+  const [kopi, setKopi] = useState(null);
+  useEffect(() => { lagringsInfo().then(setLagring); trengerSikkerhetskopi().then(setKopi); }, []);
   const standalone = isStandalone();
 
   return html`
@@ -34,6 +36,9 @@ export function Start() {
       ${standalone && lagring && lagring.persistent === false && html`<div class="info-boks advar">
         Lagringen er ikke markert som vedvarende. Gå til Innstillinger → Lagring.
       </div>`}
+      ${kopi && html`<a class="info-boks advar blokk-lenke" href="#/innstillinger">
+        <strong>💾 Ta sikkerhetskopi:</strong>${' '}${kopi.dager === null ? 'Du har ikke tatt sikkerhetskopi ennå.' : `Det er ${kopi.dager} dager siden siste sikkerhetskopi.`}${' '}Trykk her → Sikkerhetskopi.
+      </a>`}
       ${!data && html`<p class="hjelp">Laster …</p>`}
       ${data && data.bef.length === 0 && html`<div class="tom">
         <p><strong>Ingen befaringer ennå.</strong></p>

@@ -75,7 +75,29 @@ Appen er en nettapp (PWA) som installeres fra Safari og virker helt uten nett.
 - [ ] **Tunnel/offline:** Flymodus → ta bilde. Det skal fungere uten nett (GPS kan mangle, det er normalt).
 - [ ] **Lagring:** Innstillinger → Lagring viser hvor mye plass bildene bruker (ca. 0,3–0,8 MB per bilde).
 
-> Fase 1 og 2 har ennå ikke eksport eller sikkerhetskopi (kommer i fase 3). Ikke bruk appen til ekte befaringer før det er på plass.
+## Teste fase 3 (eksport og sikkerhetskopi) på iPhone
+
+Første gang etter oppdateringen laster appen ned eksportmodulene (ca. 4 MB). Gjør det med nett.
+
+- [ ] **Oppdater** til versjon 0.3.0 (gult felt øverst, versjonen står nederst i Innstillinger).
+- [ ] Åpne testbefaringen → **«Eksport (Excel, Word, PDF, Dips)»**.
+- [ ] **Excel + bilder:** «Lag fil» → «Del / lagre …» → «Arkiver i Filer» eller Mail. Åpne i Excel. Sjekk arkene,
+  ID-kolonnene, datoene og at kolonnene for side/pall/del bare er fylt ut der de gjelder. Bilde-zip-en har filnavn som
+  `Fig02_Obs02_P850-900.jpg`, med samme figurnummer som i notatet.
+- [ ] **Word:** Åpne i Word. Sjekk topptekst, innledning, én seksjon per objekttype (Skjæring → Påhugg → Tunnel),
+  tabeller, figurtekster («Figur 3: …») og oppsummeringstabellen til slutt. Prøv å redigere teksten.
+- [ ] **PDF:** Samme innhold som Word. Sjekk at bildene er skarpe nok. Prøv «Høy» bildekvalitet.
+- [ ] **Dips:** CSV-filen har kolonnene `Dip, Dip Direction, Set, Profil, Observasjon, Kommentar`.
+  Åpne den i Excel, eller importer i Dips (kolonne 1 = Dip, kolonne 2 = Dip Direction).
+- [ ] **Offline:** Slå på flymodus og lag en PDF. Det skal virke (bare delingen trenger nett hvis du velger Mail/OneDrive).
+- [ ] **Sikkerhetskopi:** Innstillinger → Sikkerhetskopi → «Lag fil» → «Del / lagre …» → lagre i OneDrive eller Filer.
+  «Siste sikkerhetskopi» skal oppdateres.
+- [ ] **Gjenopprett:** Slett en testobservasjon helt (papirkurv er ikke nok – bruk «Fjern testdata»), og velg så
+  «Gjenopprett fra fil …» med sikkerhetskopien. Testdataene skal komme tilbake med bilder.
+- [ ] **Påminnelse:** Startsiden minner deg på sikkerhetskopi hvis du har egne befaringer og det er over 14 dager siden sist.
+
+> **Viktig før du bruker appen i felt:** Ta sikkerhetskopi jevnlig og lagre den utenfor telefonen (OneDrive/e-post).
+> Data som bare ligger på telefonen, forsvinner hvis telefonen blir borte.
 
 ## Oppbygging (for den som vil se i koden)
 
@@ -87,9 +109,11 @@ Appen er en nettapp (PWA) som installeres fra Safari og virker helt uten nett.
 | `js/views/` | Skjermene |
 | `js/bilder.js` | Komprimering og lagring av bilder |
 | `js/views/foto.js` | Bildedelen i observasjonen |
+| `js/eksport/` | Excel, Word, PDF og Dips. `data.js` bygger én felles rapportmodell for Word og PDF |
+| `js/sikkerhetskopi.js` | Sikkerhetskopi til zip og gjenoppretting (slår sammen, sletter aldri) |
 | `js/testdata.js` | Fiktive testdata (også fiktive bilder) |
 | `sw.js` | Offline-støtte. Lista `FILER` må inneholde alle filer appen bruker |
-| `vendor/` | Lokale kopier av Preact/htm og Dexie (ingen nettverk ved kjøring) |
+| `vendor/` | Lokale kopier av Preact/htm, Dexie, SheetJS, docx, pdfmake og JSZip (ingen nettverk ved kjøring) |
 | `tools/lag-ikoner.py` | Lager app-ikonene |
 
 Endringer du gjør i Innstillinger lagres på telefonen og overstyrer `config/*.json`. Registrerte data slettes

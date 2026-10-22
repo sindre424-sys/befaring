@@ -154,6 +154,7 @@ export function Befaring({ id }) {
 
       <div class="knapperad vertikal">
         ${b.status !== 'avsluttet' && html`<button class="knapp stor" onClick=${avslutt}>Avslutt befaring → eksport</button>`}
+        <a class="knapp stor" href=${'#/eksport/' + id}>Eksport (Excel, Word, PDF, Dips)</a>
         <button class="knapp fare-tekst" onClick=${slett}>Flytt befaring til papirkurv</button>
       </div>
       <p class="hjelp sentrert">Startet ${fmtDatoTid(b.start)}${b.slutt ? ' · avsluttet ' + fmtDatoTid(b.slutt) : ''}</p>

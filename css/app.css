@@ -360,3 +360,11 @@ input[type='datetime-local'] { min-width: 0; max-width: 100%; display: block; }
 .foto-rad { display: flex; gap: 10px; align-items: flex-start; }
 .foto-sted { display: block; width: 100%; text-align: left; background: none; border: 0; color: var(--tekst); font: inherit; font-size: 0.92rem; padding: 6px 0; min-height: 44px; cursor: pointer; }
 .kort-tittel, .kort-under { overflow-wrap: anywhere; }
+
+/* ---------- Eksport ---------- */
+.eksport-kort { background: var(--flate); border: 1px solid var(--kant); border-radius: var(--radius); padding: 12px 14px; margin-bottom: 12px; box-shadow: var(--skygge); }
+.seksjon .eksport-kort { background: var(--bg); box-shadow: none; }
+.eksport-topp { display: flex; gap: 12px; align-items: center; margin-bottom: 10px; }
+.eksport-ikon { font-size: 2rem; line-height: 1; }
+.fil-linje { font-size: 0.92rem; overflow-wrap: anywhere; margin: 4px 0; }
+.blokk-lenke { display: block; text-decoration: none; }
