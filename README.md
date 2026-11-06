@@ -136,6 +136,22 @@ Ta sikkerhetskopi før du oppdaterer. For å se de nye testdataene: Innstillinge
 > **Viktig før du bruker appen i felt:** Ta sikkerhetskopi jevnlig og lagre den utenfor telefonen (OneDrive/e-post).
 > Data som bare ligger på telefonen, forsvinner hvis telefonen blir borte.
 
+## Teste versjon 0.6.0 (sikringssymboler)
+
+1. Åpne et bilde og trykk **✏️ Tegn og sikring**. Fanen **Sikring** er valgt.
+2. Velg **3 m Ø20** i symbolraden og trykk tre steder på bildet. Tre symboler skal komme opp, og linjen med Σ skal vise 3 bolter.
+3. Sveip symbolraden sideveis og velg **8 m Ø32**, deretter **Rensk**. Plasser ett av hver.
+4. Zoom med to fingre, og flytt bildet med én finger. Det skal ikke komme nye symboler. Trykk **Hele bildet** for å gå tilbake.
+5. Velg **Sprøytebetong** og trykk fire hjørner. Trykk på første hjørne eller **Ferdig**, og skriv for eksempel `2,5` som areal.
+6. Velg **Grundig rensk** og lag et område. Da skal appen ikke spørre om areal.
+7. Gå til fanen **Velg**. Dra et symbol til nytt sted, bytt symbol i listen, og slett det. Prøv **↶ Angre**.
+8. Trykk på området med sprøytebetong, dra et hjørne, og endre arealet med **Areal**.
+9. Trykk på Σ-linjen for å se mengdene, og trykk **Symbol: Middels** for å endre størrelsen.
+10. Lukk appen helt mens du tegner, og åpne bildet igjen. Tegningen skal fortsatt være der.
+11. Åpne bildet på nytt, gjør en endring, og trykk **Avbryt** og **Forkast**. Tegningen skal være som før.
+12. Lag en Word-rapport. Symbolene skal være med på bildet, og mengdene skal stå i figurteksten.
+13. Gå til **Innstillinger → Felles valglister → Boltetyper**, legg til og fjern et valg.
+
 ## Oppbygging (for den som vil se i koden)
 
 | Mappe/fil | Innhold |

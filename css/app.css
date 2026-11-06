@@ -412,9 +412,9 @@ input[type='datetime-local'] { min-width: 0; max-width: 100%; display: block; }
   padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom); }
 .tegne-topp { display: flex; justify-content: space-between; align-items: center; padding: 4px 10px; gap: 8px; }
 .tegne-topp .knapp.flat { color: #fff; }
-.tegne-flate { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 4px; }
-.tegne-ramme { position: relative; display: inline-block; line-height: 0; max-width: 100%; max-height: 100%; }
-.tegne-ramme img { max-width: 100%; max-height: calc(100vh - 300px); display: block; }
+.tegne-flate { position: relative; flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; touch-action: none; }
+.tegne-ramme { position: relative; flex: none; line-height: 0; transform-origin: 0 0; will-change: transform; }
+.tegne-ramme img { width: 100%; height: 100%; display: block; }
 .tegne-svg { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; }
 .tegne-verktoy { padding: 6px 10px; background: #111; }
 .tegne-verktoy .chips { margin-bottom: 6px; }
@@ -428,8 +428,30 @@ input[type='datetime-local'] { min-width: 0; max-width: 100%; display: block; }
 /* Tegnemodus: hindre rulling, zoom, markering og «lagre bilde»-menyen på iPhone */
 .tegnemodus { touch-action: none; overscroll-behavior: contain; -webkit-user-select: none; user-select: none; }
 .tegnemodus .tegne-verktoy, .tegnemodus .tegne-tekst, .tegnemodus .tegne-topp { touch-action: manipulation; }
+.tegnemodus .tegne-verktoy .symbol-rad { touch-action: pan-x; }
+.tegnemodus .tegne-verktoy { touch-action: pan-y; }
 .tegne-ramme img { -webkit-touch-callout: none; pointer-events: none; }
 .tegne-svg { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
 .tegne-tekst input { -webkit-user-select: text; user-select: text; }
 .tegne-verktoy .chips { gap: 6px; }
 .tegne-verktoy .chip { min-height: 44px; padding: 6px 10px; }
+.tegne-verktoy { max-height: 52vh; overflow-y: auto; }
+.tegne-faner .chip { flex: 1; justify-content: center; text-align: center; }
+.tegne-faner { display: flex; }
+.tegne-zoomknapp { position: absolute; right: 8px; top: 8px; min-height: 44px; background: rgba(0, 0, 0, .7); color: #fff; border-color: #666; }
+.symbol-rad { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 2px; -webkit-overflow-scrolling: touch; touch-action: pan-x; }
+.symbol-knapp { flex: none; width: 68px; min-height: 68px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  background: #222; color: #fff; border: 2px solid #444; border-radius: 10px; font-size: 11px; line-height: 1.15; padding: 4px 2px; }
+.symbol-knapp.valgt { border-color: #4da3ff; background: #16324d; }
+.mini-symbol { width: 32px; height: 32px; flex: none; }
+.tegne-kontekst { display: flex; align-items: center; gap: 8px; min-height: 82px; padding-bottom: 6px; }
+.tegne-kontekst > span { flex: 1; min-width: 0; font-size: 14px; }
+.tegne-kontekst .knapp { color: #fff; background: #222; border-color: #444; }
+.tegne-kontekst .knapp.primar { background: #4da3ff; color: #04111f; border-color: #4da3ff; }
+.tegne-kontekst .knapp.fare-tekst, .tegne-handling .knapp.fare-tekst { color: #ff8a8a; }
+.tegne-velger { flex: 1; min-width: 0; min-height: 48px; background: #fff; color: #000; border-radius: 8px; font-size: 16px; }
+.tegne-handling .knapp { color: #fff; background: #222; border-color: #444; flex: 1; }
+.tegne-sum { display: block; width: 100%; min-height: 40px; margin-top: 6px; padding: 6px 8px; text-align: left; background: none; color: #fff; border: 1px solid #444; border-radius: 8px; font-size: 13px; }
+.tegne-mengder { padding: 8px 12px; background: #1b1b1b; max-height: 38vh; overflow-y: auto; touch-action: pan-y; }
+.mengde-rad { display: flex; align-items: center; gap: 10px; padding: 4px 0; font-size: 15px; }
+.mengde-rad span { flex: 1; }

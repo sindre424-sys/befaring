@@ -21,8 +21,8 @@ export async function lastStandardConfig() {
   } catch (e) {
     console.warn('Fant ikke config/typer.json – bruker innebygd liste', e);
   }
-  const [felles, qsystem, ...typer] = await Promise.all([hent('felles'), hent('qsystem'), ...STANDARD_TYPER.map(hent)]);
-  DEFAULTS = { felles, qsystem, typer: Object.fromEntries(typer.map((t) => [t.id, t])) };
+  const [felles, qsystem, sikring, ...typer] = await Promise.all([hent('felles'), hent('qsystem'), hent('sikring'), ...STANDARD_TYPER.map(hent)]);
+  DEFAULTS = { felles, qsystem, sikring, typer: Object.fromEntries(typer.map((t) => [t.id, t])) };
   return DEFAULTS;
 }
 
@@ -65,7 +65,8 @@ export function byggConfig(rader) {
   const liste = Object.values(typer).sort((a, b) => (a.rekkefolge ?? 99) - (b.rekkefolge ?? 99));
   const innstillinger = { ...STANDARD_INNSTILLINGER, ...(map['generelt'] || {}) };
   const qsystem = map['config:qsystem'] || DEFAULTS.qsystem;
-  return { typer, felles, liste, innstillinger, qsystem, fellesEndret: !!map['config:felles'], qEndret: !!map['config:qsystem'] };
+  const sikring = { ...DEFAULTS.sikring, ...(map['config:sikring'] || {}) };
+  return { typer, felles, liste, innstillinger, qsystem, sikring, fellesEndret: !!map['config:felles'], qEndret: !!map['config:qsystem'], sikringEndret: !!map['config:sikring'] };
 }
 
 /** Henter konfigurasjon + innstillinger og oppdateres automatisk ved endringer. */
@@ -104,6 +105,20 @@ export async function tilbakestillQsystem() {
 }
 export async function tilbakestillFelles() {
   await slettConfigRad('config:felles');
+}
+
+/** Lagrer bare listen som ble endret, slik at nye standardsymboler fortsatt kommer med senere. */
+export async function lagreSikring(k, v) {
+  const rad = await db.innstillinger.get('config:sikring');
+  await setConfigRad('config:sikring', { ...(rad ? rad.value : {}), [k]: v });
+}
+export async function hentSikringOverstyring() {
+  const rad = await db.innstillinger.get('config:sikring');
+  return rad ? rad.value : null;
+}
+export async function settSikringOverstyring(verdi) {
+  if (verdi) await setConfigRad('config:sikring', verdi);
+  else await slettConfigRad('config:sikring');
 }
 
 export async function nyType(navn, malId, config) {

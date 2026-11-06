@@ -1,0 +1,25 @@
+{
+  "beskrivelse": "Sikringssymboler til tegning på bilder. Formen viser lengden og prikkene viser dimensjonen. Listene kan endres under Innstillinger → Felles valglister.",
+  "bolter": [
+    { "id": "bolt-2.4-20", "lengde": 2.4, "dim": 20, "form": "ring", "prikker": "1" },
+    { "id": "bolt-3-20", "lengde": 3, "dim": 20, "form": "trekant", "prikker": "1" },
+    { "id": "bolt-3-25", "lengde": 3, "dim": 25, "form": "trekant", "prikker": "2" },
+    { "id": "bolt-4-20", "lengde": 4, "dim": 20, "form": "firkant", "prikker": "1" },
+    { "id": "bolt-4-25", "lengde": 4, "dim": 25, "form": "firkant", "prikker": "2" },
+    { "id": "bolt-4-32", "lengde": 4, "dim": 32, "form": "firkant", "prikker": "3" },
+    { "id": "bolt-5-20", "lengde": 5, "dim": 20, "form": "femkant", "prikker": "1" },
+    { "id": "bolt-5-25", "lengde": 5, "dim": 25, "form": "femkant", "prikker": "2" },
+    { "id": "bolt-5-32", "lengde": 5, "dim": 32, "form": "femkant", "prikker": "3" },
+    { "id": "bolt-6-32", "lengde": 6, "dim": 32, "form": "stjerne", "prikker": "3" },
+    { "id": "bolt-8-32", "lengde": 8, "dim": 32, "form": "sirkelkryss", "prikker": "3" }
+  ],
+  "annen": [
+    { "id": "rensk", "navn": "Rensk", "type": "punkt", "form": "kryss" },
+    {
+      "id": "rensk-omrade", "navn": "Grundig rensk", "type": "polygon", "stil": "gul", "areal": false,
+      "beskrivelse": "Ekstra behov for grundig rensk innenfor gule polygoner."
+    },
+    { "id": "sprutbetong", "navn": "Sprøytebetong", "type": "polygon", "stil": "bla", "areal": true }
+  ],
+  "boltetyper": ["Kombinasjonsbolt", "Fullt innstøpt", "Endeforankret", "Stag"]
+}

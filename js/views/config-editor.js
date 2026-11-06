@@ -2,7 +2,11 @@
 // Endringer her sletter aldri registrerte data: verdier som fjernes fra en liste
 // blir stående på observasjonene og vises som «(ikke i listen)».
 import { html, useState } from '../lib.js';
-import { useCtx, lagreType, tilbakestillType, lagreFelles, tilbakestillFelles, standardConfig, lagreQsystem, tilbakestillQsystem } from '../config.js';
+import {
+  useCtx, lagreType, tilbakestillType, lagreFelles, tilbakestillFelles, standardConfig, lagreQsystem, tilbakestillQsystem,
+  lagreSikring, hentSikringOverstyring, settSikringOverstyring,
+} from '../config.js';
+import { FORMER, boltNavn } from '../sikring.js';
 import { Topp, Seksjon, TextField, NumField, Bryter, Chips, visMelding, bekreft } from '../ui.js';
 import { TypeIkon, IKON_VALG } from '../ikoner.js';
 import { slug } from '../util.js';
@@ -172,6 +176,7 @@ export function TypeRedigerer({ id }) {
 export function FellesRedigerer() {
   const ctx = useCtx();
   const f = ctx.config.felles;
+  const s = ctx.config.sikring;
   const lagre = (k) => (v) => lagreFelles({ ...f, [k]: v });
   return html`
     <${Topp} tittel="Felles valglister" tilbake="innstillinger" />
@@ -184,6 +189,27 @@ export function FellesRedigerer() {
           felt=${[{ id: 'navn', navn: 'Navn' }, { id: 'alvorlighet', navn: 'Alvorlighet', type: 'valg', valg: ['gronn', 'gul', 'rod'] }]} />
       <//>
       <${Seksjon} tittel="Hurtignavn for sprekkesett"><${ListeRedigerer} liste=${f.sprekkesettnavn} onChange=${lagre('sprekkesettnavn')} /><//>
+      <${Seksjon} tittel="Boltetyper">
+        <p class="hjelp">Valgene i nedtrekksmenyen for boltetype i arbeidsbeskrivelsen.</p>
+        <${ListeRedigerer} liste=${s.boltetyper} nyTekst="Ny boltetype" onChange=${(v) => lagreSikring('boltetyper', v)} />
+      <//>
+      <${Seksjon} tittel="Boltesymboler">
+        <p class="hjelp">Symbolene i tegneverktøyet. Formen viser lengden. Prikkene viser dimensjonen: 1 = inni, 2 eller 3 = under. Symboler som allerede er tegnet, påvirkes ikke.</p>
+        <${ObjektListe} liste=${s.bolter.map((b) => ({ ...b, navn: boltNavn(b) }))} tittel="navn" onChange=${(v) => lagreSikring('bolter', v.map(({ navn, ...r }) => r))}
+          ny=${() => ({ id: 'bolt-' + Date.now().toString(36), lengde: 3, dim: 20, form: 'trekant', prikker: '1' })}
+          felt=${[
+            { id: 'lengde', navn: 'Lengde (m)', type: 'tall' },
+            { id: 'dim', navn: 'Dimensjon (Ø mm)', type: 'tall' },
+            { id: 'form', navn: 'Form', type: 'valg', valg: FORMER },
+            { id: 'prikker', navn: 'Prikker', type: 'valg', valg: ['1', '2', '3'] },
+          ]} />
+        ${ctx.config.sikringEndret && html`<button class="knapp fare-tekst" onClick=${async () => {
+          if (!(await bekreft('Tilbakestille boltetyper og boltesymboler til standard?', { ok: 'Tilbakestill', fare: true, detalj: 'Symboler som allerede er tegnet, påvirkes ikke.' }))) return;
+          const gammel = await hentSikringOverstyring();
+          await settSikringOverstyring(null);
+          visMelding('Tilbakestilt.', { angre: () => settSikringOverstyring(gammel) });
+        }}>Tilbakestill sikringslister</button>`}
+      <//>
       <${Seksjon} tittel="Q-system (tabellverdier)">
         <p class="hjelp">${ctx.config.qsystem.kilde || ''} Endringer gjelder nye valg – verdier som allerede er registrert, beholdes.</p>
         <${JsonRedigerer} verdi=${ctx.config.qsystem} onBruk=${lagreQsystem} />

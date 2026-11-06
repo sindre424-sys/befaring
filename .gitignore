@@ -9,3 +9,8 @@
 *.heic
 .DS_Store
 .claude/
+*.pptx
+*.pptm
+*.potx
+*.dotx
+*.docm

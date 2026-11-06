@@ -1,6 +1,6 @@
 // Service worker: lagrer hele appen lokalt slik at den virker 100 % uten nett.
 // VIKTIG: Øk VERSJON ved hver endring, ellers får ikke telefonen den nye versjonen.
-const VERSJON = '0.5.2';
+const VERSJON = '0.6.0';
 const CACHE = 'befaring-' + VERSJON;
 
 const FILER = [
@@ -18,6 +18,7 @@ const FILER = [
   'config/typer.json',
   'config/qsystem.json',
   'config/byggegrop.json',
+  'config/sikring.json',
   'vendor/preact-htm.mjs',
   'vendor/dexie.mjs',
   'vendor/xlsx.mini.min.js',
@@ -61,6 +62,7 @@ const FILER = [
   'js/skisser/rose.js',
   'js/qsystem.js',
   'js/tegning.js',
+  'js/sikring.js',
   'js/views/qsystem.js',
   'js/views/start.js',
   'js/views/ny-befaring.js',

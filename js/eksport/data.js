@@ -4,6 +4,7 @@ import { db, getInnstillinger } from '../db.js';
 import { hentConfig } from '../config.js';
 import { profilTekst, obsNr, fmtDato, fmtDatoTid, fmtNum, ALVORLIGHET, norm360, pad2 } from '../util.js';
 import { stedForFoto } from '../bilder.js';
+import { mengdeTekst } from '../sikring.js';
 import { fallretningTilStrok, fmtRetning, fmtFall } from '../logikk.js';
 import { lagBygger, tilSvgTekst, RAPPORT_FARGER } from '../skisser/svg.js';
 import { tegnProfilstripe } from '../skisser/profilstripe.js';
@@ -211,7 +212,8 @@ export function byggModell(data, valg = {}) {
         const nr = ++figNr;
         figurFor[f.id] = nr;
         const sted = f.sted || stedForFoto(o);
-        return { nr, foto: f, tekst: `Figur ${nr}: ${sted}${f.kommentar ? ' – ' + f.kommentar : ''}` };
+        const sikring = mengdeTekst(f.tegning);
+        return { nr, foto: f, tekst: `Figur ${nr}: ${sted}${f.kommentar ? ' – ' + f.kommentar : ''}${sikring ? `. Sikring: ${sikring}` : ''}` };
       });
       seksjon.observasjoner.push({
         o, t, overskrift: obsOverskrift(o, t), felter, tekst: o.tekst || '', geometri, malinger: mal, sett: settRader,
