@@ -2,7 +2,7 @@
 // Lagres som vektordata på bildet (foto.tegning), slik at originalbildet aldri endres.
 // Ved eksport tegnes figurene inn i en kopi av bildet.
 import { html, h, useState, useRef, useEffect } from './lib.js';
-import { patch } from './db.js';
+import { db, patch, useBildeUrl } from './db.js';
 import { lagBygger, tilSvgTekst } from './skisser/svg.js';
 import { bekreft, visMelding } from './ui.js';
 import { useCtx } from './config.js';
@@ -125,6 +125,48 @@ export async function bildeMedTegning(foto, kvalitet = 0.88) {
   }
 }
 
+// ---------- Utkast ----------
+// Mens du tegner, lagres arbeidet i et lite utkast på telefonen. Selve bilderaden skrives først når du trykker
+// Ferdig, så bildet ikke kopieres for hver strek. Utkastet overlever at appen lukkes, og hentes inn ved neste start.
+const UTKAST = 'befaring-tegneutkast:';
+
+function skrivUtkast(fotoId, tegning) {
+  try {
+    localStorage.setItem(UTKAST + fotoId, JSON.stringify({ tegning }));
+    return true;
+  } catch (e) {
+    console.warn('Kunne ikke lagre tegneutkast', e);
+    return false;
+  }
+}
+function fjernUtkast(fotoId) {
+  try {
+    localStorage.removeItem(UTKAST + fotoId);
+  } catch (e) {
+    /* ignorer */
+  }
+}
+
+/** Legger inn tegninger som ikke ble lukket, for eksempel fordi telefonen lukket appen. */
+export async function hentInnUtkast() {
+  let nokler = [];
+  try {
+    nokler = Object.keys(localStorage).filter((k) => k.startsWith(UTKAST));
+  } catch (e) {
+    return;
+  }
+  for (const k of nokler) {
+    const fotoId = k.slice(UTKAST.length);
+    try {
+      const { tegning } = JSON.parse(localStorage.getItem(k));
+      if (await db.fotos.get(fotoId)) await patch('fotos', fotoId, { tegning });
+      fjernUtkast(fotoId);
+    } catch (e) {
+      console.warn('Kunne ikke hente inn tegneutkast', e);
+    }
+  }
+}
+
 // ---------- Tegnemodus ----------
 const VERKTOY = [['frihand', '✎ Frihånd'], ['pil', '➚ Pil'], ['sirkel', '◯ Sirkel'], ['tekst', 'T Tekst']];
 const TYKKELSER = [['Tynn', 0.6], ['Middels', 1], ['Tykk', 1.8]];
@@ -216,7 +258,7 @@ export function Tegnemodus({ foto, onLukk }) {
   const annen = sikring.annen || [];
   const paletten = [...bolter, ...annen.filter((a) => a.type === 'punkt')];
 
-  const [url, setUrl] = useState(null);
+  const { url, onError: bildeFeil, feilet: bildeFeilet } = useBildeUrl(foto.id);
   const [dim, setDim] = useState(foto.bredde && foto.hoyde ? { bredde: foto.bredde, hoyde: foto.hoyde } : null);
   const [figurer, setFigurer] = useState((foto.tegning && foto.tegning.figurer) || []);
   const [symbolSkala, setSymbolSkala] = useState((foto.tegning && foto.tegning.symbolSkala) || 1);
@@ -257,11 +299,6 @@ export function Tegnemodus({ foto, onLukk }) {
   const tilstand = useRef({});
   tilstand.current = { dim, verktoy, farge, tykkelse, symbol, symbolSkala, valgt };
 
-  useEffect(() => {
-    const u = URL.createObjectURL(foto.blob);
-    setUrl(u);
-    return () => URL.revokeObjectURL(u);
-  }, [foto.id]);
   useEffect(() => { if (tekstPunkt && tekstRef.current) tekstRef.current.focus(); }, [tekstPunkt]);
   useEffect(() => { if (arealFor !== null && arealRef.current) arealRef.current.focus(); }, [arealFor]);
 
@@ -272,16 +309,30 @@ export function Tegnemodus({ foto, onLukk }) {
       ? { versjon: 2, bredde: d.bredde, hoyde: d.hoyde, symbolSkala: tilstand.current.symbolSkala, figurer: figRef.current }
       : null;
   };
-  const lagreNa = async () => {
+  const lagreUtkast = () => {
     clearTimeout(lagreTimer.current);
     if (!ulagret.current) return;
     ulagret.current = false;
-    await patch('fotos', foto.id, { tegning: tegningNa() });
+    if (!skrivUtkast(foto.id, tegningNa())) patch('fotos', foto.id, { tegning: tegningNa() });
   };
   const planleggLagring = () => {
     ulagret.current = true;
     clearTimeout(lagreTimer.current);
-    lagreTimer.current = setTimeout(lagreNa, 500);
+    lagreTimer.current = setTimeout(lagreUtkast, 400);
+  };
+  const erEndret = () => {
+    const opprinnelig = original.current;
+    const na = tegningNa();
+    if (!opprinnelig || !na) return !!opprinnelig !== !!na;
+    return JSON.stringify(opprinnelig.figurer || []) !== JSON.stringify(na.figurer)
+      || (opprinnelig.symbolSkala || 1) !== na.symbolSkala;
+  };
+  /** Skriver til bilderaden bare hvis noe faktisk er endret. */
+  const lagreEndelig = async () => {
+    clearTimeout(lagreTimer.current);
+    ulagret.current = false;
+    if (erEndret()) await patch('fotos', foto.id, { tegning: tegningNa() });
+    fjernUtkast(foto.id);
   };
   const sett = (ny, medHistorikk = true) => {
     if (medHistorikk) {
@@ -300,13 +351,13 @@ export function Tegnemodus({ foto, onLukk }) {
     sett(forrige, false);
   };
   useEffect(() => {
-    const iBakgrunn = () => { if (document.visibilityState === 'hidden') lagreNa(); };
+    const iBakgrunn = () => { if (document.visibilityState === 'hidden') lagreUtkast(); };
     document.addEventListener('visibilitychange', iBakgrunn);
-    window.addEventListener('pagehide', lagreNa);
+    window.addEventListener('pagehide', lagreUtkast);
     return () => {
       document.removeEventListener('visibilitychange', iBakgrunn);
-      window.removeEventListener('pagehide', lagreNa);
-      if (!lukket.current) lagreNa();
+      window.removeEventListener('pagehide', lagreUtkast);
+      if (!lukket.current) lagreEndelig();
     };
   }, []);
 
@@ -690,19 +741,17 @@ export function Tegnemodus({ foto, onLukk }) {
   const ferdig = async () => {
     fullforPoly();
     lukket.current = true;
-    ulagret.current = true;
-    await lagreNa();
+    await lagreEndelig();
     visMelding(figRef.current.length ? 'Tegningen er lagret. Originalbildet er uendret.' : 'Tegningen er fjernet.');
     onLukk();
   };
   const avbryt = async () => {
-    const forrige = original.current ? original.current.figurer || [] : [];
-    const endret = polyRef.current || JSON.stringify(forrige) !== JSON.stringify(figRef.current);
+    const endret = polyRef.current || erEndret();
     if (endret && !(await bekreft('Forkaste endringene i tegningen?', { ok: 'Forkast', fare: true, detalj: 'Tegningen settes tilbake til slik den var da du åpnet den.' }))) return;
     lukket.current = true;
     clearTimeout(lagreTimer.current);
     ulagret.current = false;
-    if (endret) await patch('fotos', foto.id, { tegning: original.current });
+    fjernUtkast(foto.id);
     onLukk();
   };
   const tom = async () => {
@@ -770,12 +819,13 @@ export function Tegnemodus({ foto, onLukk }) {
     </div>
     <div class="tegne-flate" ref=${flateRef}>
       <div class="tegne-ramme" ref=${rammeRef} style=${rammeMal ? { width: rammeMal.w + 'px', height: rammeMal.h + 'px', transform: trans() } : { visibility: 'hidden' }}>
-        ${url && html`<img src=${url} alt="" draggable="false" onLoad=${(e) => !dim && setDim({ bredde: e.target.naturalWidth, hoyde: e.target.naturalHeight })} />`}
+        ${url && html`<img src=${url} alt="" draggable="false" onError=${bildeFeil} onLoad=${(e) => !dim && setDim({ bredde: e.target.naturalWidth, hoyde: e.target.naturalHeight })} />`}
         ${dim && h('svg', { ref: svgRef, class: 'tegne-svg', viewBox: `0 0 ${dim.bredde} ${dim.hoyde}`, preserveAspectRatio: 'none' },
           figurerSvg(A, tegning, utkast),
           poly && polygonSvg(A, { punkter: poly.punkter, stil: poly.def.stil }, strek(dim.bredde, dim.hoyde), true),
           merking())}
       </div>
+      ${bildeFeilet && html`<div class="bilde-feil">Bildet kan ikke vises akkurat nå. Det er ikke slettet. Lukk appen helt og åpne den igjen.</div>`}
       ${zoomVis > 1.01 && html`<button class="knapp tegne-zoomknapp" onClick=${nullstillZoom}>Hele bildet</button>`}
     </div>
     ${visMengder && html`<div class="tegne-mengder">

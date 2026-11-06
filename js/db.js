@@ -34,10 +34,31 @@ export async function add(table, obj) {
   return rad;
 }
 
+/**
+ * Safari/iPhone: når en rad med bilder skrives på nytt, kan bildet ikke leses igjen før appen startes på nytt.
+ * Lagrede data er hele, men fila som økten peker på, er borte. Derfor lagres alltid en ny kopi av bildene
+ * sammen med raden. Kan bildet ikke leses, står de lagrede bildene urørt.
+ */
+async function ferskeBilder(table, id) {
+  if (table !== 'fotos') return {};
+  const rad = await db.fotos.get(id);
+  const ut = {};
+  for (const felt of ['blob', 'miniatyr']) {
+    const b = rad && rad[felt];
+    if (!(b instanceof Blob)) continue;
+    try {
+      ut[felt] = new Blob([await b.arrayBuffer()], { type: b.type || 'image/jpeg' });
+    } catch (e) {
+      console.warn('Kunne ikke kopiere bildet, beholder det lagrede', e);
+    }
+  }
+  return ut;
+}
+
 /** Oppdaterer felt. Støtter punktnotasjon, f.eks. {'sted.side': 'Høyre'}. */
 export async function patch(table, id, changes) {
   const now = Date.now();
-  await db[table].update(id, { ...changes, updated: now });
+  await db[table].update(id, { ...changes, ...(await ferskeBilder(table, id)), updated: now });
   if (table !== 'befaringer' && table !== 'prosjekter') {
     const rad = await db[table].get(id);
     if (rad && rad.befaringId) await db.befaringer.update(rad.befaringId, { updated: now });
@@ -47,11 +68,11 @@ export async function patch(table, id, changes) {
 
 /** «Sletting» flytter til papirkurven. Ingenting forsvinner for godt. */
 export async function softDelete(table, id) {
-  await db[table].update(id, { slettet: Date.now() });
+  await db[table].update(id, { slettet: Date.now(), ...(await ferskeBilder(table, id)) });
   varsleLagret();
 }
 export async function restore(table, id) {
-  await db[table].update(id, { slettet: null, updated: Date.now() });
+  await db[table].update(id, { slettet: null, ...(await ferskeBilder(table, id)), updated: Date.now() });
   varsleLagret();
 }
 
@@ -132,3 +153,35 @@ export function useLive(fn, deps = [], initial = undefined) {
 }
 
 export const ikkeSlettet = (r) => r && !r.slettet;
+
+/**
+ * Adresse til et bilde, hentet direkte fra databasen. Feiler bildet, hentes det på nytt.
+ * feilet = true betyr at bildet ikke kan vises i denne økten.
+ */
+export function useBildeUrl(id, felt = 'blob') {
+  const [url, setUrl] = useState(null);
+  const [forsok, setForsok] = useState(0);
+  const [feilet, setFeilet] = useState(false);
+  useEffect(() => {
+    let u = null;
+    let avbrutt = false;
+    db.fotos.get(id).then((r) => {
+      if (avbrutt) return;
+      if (!r || !r[felt]) {
+        setFeilet(true);
+        return;
+      }
+      u = URL.createObjectURL(r[felt]);
+      setUrl(u);
+    });
+    return () => {
+      avbrutt = true;
+      if (u) URL.revokeObjectURL(u);
+    };
+  }, [id, forsok]);
+  const onError = () => {
+    if (forsok < 2) setForsok(forsok + 1);
+    else setFeilet(true);
+  };
+  return { url, onError, feilet };
+}

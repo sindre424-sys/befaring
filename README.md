@@ -147,7 +147,7 @@ Ta sikkerhetskopi før du oppdaterer. For å se de nye testdataene: Innstillinge
 7. Gå til fanen **Velg**. Dra et symbol til nytt sted, bytt symbol i listen, og slett det. Prøv **↶ Angre**.
 8. Trykk på området med sprøytebetong, dra et hjørne, og endre arealet med **Areal**.
 9. Trykk på Σ-linjen for å se mengdene, og trykk **Symbol: Middels** for å endre størrelsen.
-10. Lukk appen helt mens du tegner, og åpne bildet igjen. Tegningen skal fortsatt være der.
+10. Lukk appen helt mens du tegner, og åpne den igjen. Tegningen skal fortsatt være på bildet.
 11. Åpne bildet på nytt, gjør en endring, og trykk **Avbryt** og **Forkast**. Tegningen skal være som før.
 12. Lag en Word-rapport. Symbolene skal være med på bildet, og mengdene skal stå i figurteksten.
 13. Gå til **Innstillinger → Felles valglister → Boltetyper**, legg til og fjern et valg.

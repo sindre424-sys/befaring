@@ -4,6 +4,7 @@ import { bePersistent } from './db.js';
 import { lastStandardConfig, useConfigLive, Ctx } from './config.js';
 import { useRute } from './router.js';
 import { MeldingVert, DialogVert, flushAll } from './ui.js';
+import { hentInnUtkast } from './tegning.js';
 import { Start } from './views/start.js';
 import { NyBefaring } from './views/ny-befaring.js';
 import { Befaring } from './views/befaring.js';
@@ -58,6 +59,7 @@ async function start() {
     document.getElementById('app').innerHTML = `<main class="innhold"><p>Kunne ikke laste konfigurasjonen: ${e.message}</p></main>`;
     return;
   }
+  await hentInnUtkast();
   render(html`<${App} />`, document.getElementById('app'));
   bePersistent();
   registrerServiceWorker();

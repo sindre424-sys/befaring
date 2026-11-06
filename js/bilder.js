@@ -1,7 +1,7 @@
 // Bilder: komprimering, lagring og visning.
 // Bildene lagres i den lokale databasen på telefonen (maks 2000 px langside, JPEG).
 import { html, useState, useEffect } from './lib.js';
-import { db, add, patch, getInnstillinger } from './db.js';
+import { db, add, patch, getInnstillinger, useBildeUrl } from './db.js';
 import { uid, profilTekst } from './util.js';
 import { hentGpsPosisjon } from './logikk.js';
 import { TegningOverlegg } from './tegning.js';
@@ -111,31 +111,42 @@ export async function lagreFoto(fil, obs, fraKamera) {
 // ---------- Visning ----------
 const miniatyrUrler = new Map();
 
+const miniatyrForsok = new Map();
+
 /** Miniatyr som ikke tegnes på nytt hver gang noe lagres (adressen gjenbrukes per bilde). */
 export function Miniatyr({ foto, onClick, klasse = 'miniatyr' }) {
+  const [, oppfrisk] = useState(0);
   const kilde = foto.miniatyr || foto.blob;
   let url = miniatyrUrler.get(foto.id);
   if (!url && kilde) {
     url = URL.createObjectURL(kilde);
     miniatyrUrler.set(foto.id, url);
   }
+  // Adressen kan ha gått ut etter en lagring. Da hentes miniatyren på nytt fra databasen.
+  const feil = async () => {
+    const n = miniatyrForsok.get(foto.id) || 0;
+    if (n >= 2) return;
+    miniatyrForsok.set(foto.id, n + 1);
+    const r = await db.fotos.get(foto.id);
+    const ny = r && (r.miniatyr || r.blob);
+    if (!ny) return;
+    const gammel = miniatyrUrler.get(foto.id);
+    miniatyrUrler.set(foto.id, URL.createObjectURL(ny));
+    if (gammel) URL.revokeObjectURL(gammel);
+    oppfrisk((x) => x + 1);
+  };
   return html`<button type="button" class=${klasse} onClick=${onClick} aria-label="Vis bildet i full størrelse">
-    ${url ? html`<img src=${url} alt="" />` : html`<span>?</span>`}
+    ${url ? html`<img src=${url} alt="" onError=${feil} />` : html`<span>?</span>`}
     <${TegningOverlegg} tegning=${foto.tegning} dekk />
     ${foto.tegning && foto.tegning.figurer && foto.tegning.figurer.length ? html`<span class="tegnet-merke" aria-hidden="true">✏️</span>` : ''}
   </button>`;
 }
 
-/** Fullt bilde. Adressen lages og frigjøres sammen med visningen. */
+/** Fullt bilde. Hentes direkte fra databasen, og adressen frigjøres sammen med visningen. */
 export function FulltBilde({ foto }) {
-  const [url, setUrl] = useState(null);
-  useEffect(() => {
-    if (!foto || !foto.blob) return;
-    const u = URL.createObjectURL(foto.blob);
-    setUrl(u);
-    return () => URL.revokeObjectURL(u);
-  }, [foto && foto.id]);
-  return url ? html`<span class="fullt-ramme"><img class="fullt-bilde" src=${url} alt=${foto.kommentar || 'Bilde'} /><${TegningOverlegg} tegning=${foto.tegning} /></span>` : null;
+  const { url, onError, feilet } = useBildeUrl(foto.id);
+  if (feilet) return html`<div class="bilde-feil">Bildet kan ikke vises akkurat nå. Det er ikke slettet. Lukk appen helt og åpne den igjen.</div>`;
+  return url ? html`<span class="fullt-ramme"><img class="fullt-bilde" src=${url} alt=${foto.kommentar || 'Bilde'} onError=${onError} /><${TegningOverlegg} tegning=${foto.tegning} /></span>` : null;
 }
 
 export async function hentFotos(obsId) {
