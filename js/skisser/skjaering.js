@@ -30,7 +30,7 @@ export function skjaeringGeometri(g = {}) {
     a: Math.min(90, Math.max(20, tall(g.helning, 80))),
     nivaer: Math.max(1, Math.round(tall(g.antallPaller, 1))),
     B: Math.max(0.5, tall(g.pallbredde, 3)),
-    G: Math.max(0.5, tall(g.groftbredde, 3)),
+    G: tall(g.groftbredde, 0) > 0 ? Math.max(0.5, Number(g.groftbredde)) : 0, // tomt felt eller 0 = ingen grøft
     L: Math.max(0, tall(g.losmasse, 1.5)),
     mangler,
     oppgitt: g,
@@ -86,9 +86,11 @@ export function tegnSkjaeringSnitt(S, f, { geometri, side = 'Høyre', valgte = [
   const HPX = 300;
   const speil = side === 'Venstre';
 
-  // --- geometri i meter (vegbane y = 0, grøftebunn y = -1) ---
+  // --- geometri i meter (vegbane y = 0, grøftebunn y = -1). Uten grøft starter skjæringen i vegkanten. ---
   const vei = 5;
-  const fot = [vei + g.G, -1];
+  const harGroft = g.G > 0;
+  const fot = [vei + g.G, harGroft ? -1 : 0];
+  const grofteLinje = harGroft ? [[vei + g.G * 0.4, -1]] : [];
   const flate = []; // stigende segmenter
   const hyller = [];
   let p = fot;
@@ -111,8 +113,8 @@ export function tegnSkjaeringSnitt(S, f, { geometri, side = 'Høyre', valgte = [
   // Loddrett: riktig målestokk. Vannrett: skjæringsflaten i samme målestokk (riktig helning),
   // mens veg, grøft, hyller og løsmasser får en minstebredde så trykkflatene blir store nok.
   const s = Math.min((HPX - 64) / (ymax - ymin), (W - 200) / Math.max(1, bergTopp[0] - fot[0]));
-  const bruddM = [0, vei, fot[0]];
-  const bruddPx = [0, 64, 64 + Math.max(g.G * s, 46)];
+  const bruddM = harGroft ? [0, vei, fot[0]] : [0, vei];
+  const bruddPx = harGroft ? [0, 64, 64 + Math.max(g.G * s, 46)] : [0, 64];
   for (let i = 0; i < flate.length; i++) {
     const [a, b] = flate[i];
     bruddM.push(b[0]);
@@ -139,8 +141,8 @@ export function tegnSkjaeringSnitt(S, f, { geometri, side = 'Høyre', valgte = [
   const Y = (y) => 26 + (ymax - y) * s;
   const P = (pt) => [X(pt[0]), Y(pt[1])];
 
-  const terrengLinje = [[0, 0], [vei, 0], [vei + g.G * 0.4, -1], fot, ...flate.flatMap(([a, b], i) => (hyller[i] ? [b, hyller[i][1]] : [b])), bakkant, [xmax, ymax - 0.1]];
-  const berg = [[0, ymin], [xmax, ymin], [xmax, bergTopp[1]], bergTopp, ...[...flate.flatMap(([a, b], i) => (hyller[i] ? [b, hyller[i][1]] : [b]))].reverse().slice(1), fot, [vei + g.G * 0.4, -1], [vei, 0], [0, 0]];
+  const terrengLinje = [[0, 0], [vei, 0], ...grofteLinje, ...(harGroft ? [fot] : []), ...flate.flatMap(([a, b], i) => (hyller[i] ? [b, hyller[i][1]] : [b])), bakkant, [xmax, ymax - 0.1]];
+  const berg = [[0, ymin], [xmax, ymin], [xmax, bergTopp[1]], bergTopp, ...[...flate.flatMap(([a, b], i) => (hyller[i] ? [b, hyller[i][1]] : [b]))].reverse().slice(1), ...(harGroft ? [fot] : []), ...grofteLinje, [vei, 0], [0, 0]];
   const losmasse = [bergTopp, bakkant, [xmax, ymax - 0.1], [xmax, bergTopp[1]]];
 
   const z = (key, d, tx, ty, liten = true) => sone(S, f, {
@@ -179,10 +181,12 @@ export function tegnSkjaeringSnitt(S, f, { geometri, side = 'Høyre', valgte = [
       `H ${o.hoyde !== undefined && o.hoyde !== null ? fmtNum(o.hoyde, 1) + ' m' : '?'}`));
     mal.push(S('text', { x: fx + forskyv * 10, y: fy - 22, 'text-anchor': speil ? 'end' : 'start', 'font-size': 11, 'font-weight': 600, fill: f.tekst, stroke: f.luft, 'stroke-width': 3, 'paint-order': 'stroke' },
       o.helning !== undefined && o.helning !== null ? `${fmtNum(o.helning, 0)}°` : '?°'));
-    const [g1x] = P([vei, 0]);
-    mal.push(S('line', { x1: g1x, y1: fy + 16, x2: fx, y2: fy + 16, stroke: f.tekst, 'stroke-width': 1 }));
-    mal.push(S('text', { x: (g1x + fx) / 2, y: fy + 28, 'text-anchor': 'middle', 'font-size': 10.5, fill: f.tekst, stroke: f.luft, 'stroke-width': 3, 'paint-order': 'stroke' },
-      `${groftTekst} ${o.groftbredde !== undefined && o.groftbredde !== null ? fmtNum(o.groftbredde, 1) + ' m' : '?'}`));
+    if (harGroft) {
+      const [g1x] = P([vei, 0]);
+      mal.push(S('line', { x1: g1x, y1: fy + 16, x2: fx, y2: fy + 16, stroke: f.tekst, 'stroke-width': 1 }));
+      mal.push(S('text', { x: (g1x + fx) / 2, y: fy + 28, 'text-anchor': 'middle', 'font-size': 10.5, fill: f.tekst, stroke: f.luft, 'stroke-width': 3, 'paint-order': 'stroke' },
+        `${groftTekst} ${fmtNum(o.groftbredde, 1)} m`));
+    }
     if (o.losmasse !== undefined && o.losmasse !== null) {
       mal.push(S('text', { x: (bx + kx) / 2 - forskyv * 10, y: (by + ky) / 2 - 8, 'text-anchor': speil ? 'start' : 'end', 'font-size': 10.5, fill: f.tekst, stroke: f.luft, 'stroke-width': 3, 'paint-order': 'stroke' }, `løsmasse ${fmtNum(o.losmasse, 1)} m`));
     }
@@ -199,8 +203,8 @@ export function tegnSkjaeringSnitt(S, f, { geometri, side = 'Høyre', valgte = [
     S('line', { x1: X(0), y1: Y(0), x2: X(vei), y2: Y(0), stroke: f.vei, 'stroke-width': 5 }),
     S('text', { x: X(vei / 2), y: Y(0) + 16, 'text-anchor': 'middle', 'font-size': 10, fill: f.tekst2 }, bunnTekst),
     S('text', { x: speil ? W - 8 : 8, y: 16, 'text-anchor': speil ? 'end' : 'start', 'font-size': 12, 'font-weight': 700, fill: f.tekst2 }, sideEtikett(side)),
-    z('groft', band(groftPkt, T), (groftPkt[0][0] + groftPkt[2][0]) / 2, groftPkt[0][1] - 24),
-    z('fot', band([P([fot[0] - 0.6, -1]), P(fot), ...klipp(flate, fot[1], fotH).map(([, b]) => P(b))], T), fx + forskyv * 40, fy + 2),
+    harGroft ? z('groft', band(groftPkt, T), (groftPkt[0][0] + groftPkt[2][0]) / 2, groftPkt[0][1] - 24) : null,
+    z('fot', band([P([fot[0] - 0.6, fot[1]]), P(fot), ...klipp(flate, fot[1], fotH).map(([, b]) => P(b))], T), fx + forskyv * 40, fy + 2),
     z('nedre', linjer(nedre), nx + forskyv * 52, ny + 4),
     hyller.length ? z('pallkant', hyller.map(([a, b]) => band([P(a), P(b)], T)).join(''), (P(hyller[0][0])[0] + P(hyller[0][1])[0]) / 2, P(hyller[0][0])[1] - 20) : null,
     z('ovre', linjer(ovre), ox + forskyv * 52, oy + 4),
