@@ -1,6 +1,6 @@
 // Service worker: lagrer hele appen lokalt slik at den virker 100 % uten nett.
 // VIKTIG: Øk VERSJON ved hver endring, ellers får ikke telefonen den nye versjonen.
-const VERSJON = '0.6.1';
+const VERSJON = '0.6.2';
 const CACHE = 'befaring-' + VERSJON;
 
 const FILER = [

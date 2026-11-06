@@ -1,2 +1,2 @@
 // Oppdateres ved hver ny versjon (samme nummer som i sw.js).
-export const APP_VERSJON = '0.6.1';
+export const APP_VERSJON = '0.6.2';

@@ -291,7 +291,7 @@ input[type='datetime-local'] { min-height: var(--trykk); }
 
 /* ---------- Melding, dialog og ark ---------- */
 .toast {
-  position: fixed; left: 12px; right: 12px; z-index: 60;
+  position: fixed; left: 12px; right: 12px; z-index: 110; /* over bildevisning og tegnemodus */
   bottom: calc(92px + env(safe-area-inset-bottom));
   display: flex; align-items: center; gap: 8px;
   background: #1f2a35; color: #fff; border-radius: var(--radius); padding: 8px 8px 8px 16px;
@@ -308,6 +308,7 @@ input[type='datetime-local'] { min-height: var(--trykk); }
 }
 .ark-topp { display: flex; justify-content: space-between; align-items: center; position: sticky; top: -8px; background: var(--flate); padding: 8px 0; z-index: 1; }
 .ark-gruppe h3 { margin-top: 8px; }
+.ark-bakgrunn.sentrert { z-index: 100; } /* spørsmål skal alltid ligge over bildevisning og tegnemodus */
 .dialog { background: var(--flate); border-radius: 16px; padding: 18px; width: 100%; max-width: 420px; }
 .dialog-tekst { font-size: 1.1rem; font-weight: 600; }
 .dialog-knapper { display: flex; gap: 10px; margin-top: 16px; }

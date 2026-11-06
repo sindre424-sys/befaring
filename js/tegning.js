@@ -747,7 +747,7 @@ export function Tegnemodus({ foto, onLukk }) {
   };
   const avbryt = async () => {
     const endret = polyRef.current || erEndret();
-    if (endret && !(await bekreft('Forkaste endringene i tegningen?', { ok: 'Forkast', fare: true, detalj: 'Tegningen settes tilbake til slik den var da du åpnet den.' }))) return;
+    if (endret && !(await bekreft('Forkaste endringene i tegningen?', { ok: 'Forkast', avbryt: 'Tegn videre', fare: true, detalj: 'Tegningen settes tilbake til slik den var da du åpnet den.' }))) return;
     lukket.current = true;
     clearTimeout(lagreTimer.current);
     ulagret.current = false;
@@ -786,7 +786,7 @@ export function Tegnemodus({ foto, onLukk }) {
   const valgtFig = valgt !== null ? figurer[valgt] : null;
   const m = tegning ? mengder(tegning) : { bolter: [], annen: [] };
   const antallBolter = m.bolter.reduce((s, b) => s + b.antall, 0);
-  const sammendrag = [antallBolter ? `${antallBolter} bolter` : '', ...m.annen.map((a) => annenMengde(a) ? `${a.navn} ${annenMengde(a)}` : a.navn)].filter(Boolean).join(' · ');
+  const sammendrag = [antallBolter ? `${antallBolter} ${antallBolter === 1 ? 'bolt' : 'bolter'}` : '', ...m.annen.map((a) => annenMengde(a) ? `${a.navn} ${annenMengde(a)}` : a.navn)].filter(Boolean).join(' · ');
   const storrelsNavn = (SYMBOLSTORRELSER.find((z) => z[1] === symbolSkala) || SYMBOLSTORRELSER[1])[0];
   const hjelp = {
     symbol: 'Trykk på bildet der symbolet skal stå.',
