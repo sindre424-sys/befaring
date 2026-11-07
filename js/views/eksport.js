@@ -4,11 +4,12 @@ import { html, useState, useRef } from '../lib.js';
 import { db, useLive, patch } from '../db.js';
 import { useCtx } from '../config.js';
 import { Topp, Seksjon, Chips, visMelding, bekreft } from '../ui.js';
-import { fmtDato, fmtDatoTid } from '../util.js';
+import { fmtDato, fmtDatoTid, erPc } from '../util.js';
 import { go } from '../router.js';
 import { hentBefaringData, byggModell } from '../eksport/data.js';
 import { delFiler, kanDele, fmtStorrelse } from '../eksport/del.js';
-import { lagSikkerhetskopi, markerSikkerhetskopiTatt, lesSikkerhetskopi, gjenopprett } from '../sikkerhetskopi.js';
+import { lagSikkerhetskopi, markerSikkerhetskopiTatt, lesSikkerhetskopi, gjenopprett, forhandsvis } from '../sikkerhetskopi.js';
+import { stottes, useArbeidsmappe, velgMappe, giTilgang, fjernMappe, lagreTilMappe } from '../arbeidsmappe.js';
 
 function EksportKnapp({ ikon, tittel, beskrivelse, lag, etterDeling }) {
   const [tilstand, setTilstand] = useState({ s: 'klar' });
@@ -126,6 +127,13 @@ export function Eksport({ id }) {
         <p class="hjelp">Figurnumrene i Excel og bilde-zip følger valgene her, så lag gjerne alle filene med samme valg.</p>
       <//>
 
+      <${EksportKnapp} ikon="💻" tittel=${erPc() ? 'Lagre som overføringsfil' : 'Send til PC'}
+        beskrivelse=${erPc() ? 'Hele befaringen med bilder i én fil. Kan leses inn på telefonen eller en annen PC.' : 'Hele befaringen med bilder i én fil. Lagre den i OneDrive og hent den i appen på PC-en.'}
+        lag=${async (info) => {
+          info('Samler data og bilder …');
+          const { fil, antall } = await lagSikkerhetskopi((n) => info(`Pakker bilder (${n}) …`), { befaringId: id });
+          return { filer: [fil], melding: `${antall.observasjoner} observasjoner og ${antall.fotos} bilder.` };
+        }} />
       <${EksportKnapp} ikon="📊" tittel="Excel + bilder" beskrivelse="Ark: Befaring, Observasjoner, Målinger, Sprekkesett, Bilder. Bildene i egen zip." lag=${lagExcelFiler} />
       <${EksportKnapp} ikon="📄" tittel="Word-notat (.docx)" beskrivelse="Redigerbart befaringsnotat med figurer og oppsummering." lag=${lagWordFil} />
       <${EksportKnapp} ikon="📕" tittel="PDF-notat" beskrivelse="Samme innhold som Word, klar til å sende." lag=${lagPdfFil} />
@@ -136,36 +144,31 @@ export function Eksport({ id }) {
   `;
 }
 
-export function SikkerhetskopiPanel() {
-  const ctx = useCtx();
-  const siste = ctx.config.innstillinger.sisteSikkerhetskopi;
+/** Leser inn en fil fra telefon, PC eller sikkerhetskopi. Viser hva som vil skje før noe skrives. */
+export function HentFil({ tekst = 'Hent fra fil …', stor = false }) {
   const filRef = useRef(null);
   const [lesing, setLesing] = useState(null);
-
-  const lag = async (info) => {
-    info('Samler data og bilder …');
-    const { fil, antall } = await lagSikkerhetskopi((n) => info(`Pakker bilder (${n}) …`));
-    return { filer: [fil], melding: `${antall.befaringer} befaringer, ${antall.observasjoner} observasjoner, ${antall.fotos} bilder. Lagre filen et annet sted enn på telefonen, f.eks. OneDrive eller e-post til deg selv.` };
-  };
-
   const velgFil = async (e) => {
     const fil = e.target.files && e.target.files[0];
     e.target.value = '';
     if (!fil) return;
     try {
-      setLesing('Leser sikkerhetskopien …');
+      setLesing('Leser filen …');
       const kopi = await lesSikkerhetskopi(fil);
+      const plan = await forhandsvis(kopi);
       setLesing(null);
       const a = kopi.innhold.antall || {};
-      const ok = await bekreft('Gjenopprette fra sikkerhetskopi?', {
-        ok: 'Gjenopprett',
+      const ok = await bekreft('Lese inn filen?', {
+        ok: 'Les inn',
         detalj: `Laget ${fmtDatoTid(kopi.innhold.laget)}: ${a.befaringer || 0} befaringer, ${a.observasjoner || 0} observasjoner, ${a.fotos || 0} bilder. `
-          + 'Dataene slås sammen med det som finnes på telefonen. Ingenting slettes – nyeste versjon av hver registrering beholdes.',
+          + `${plan.nye} nye og ${plan.oppdateres} oppdaterte registreringer. `
+          + (plan.nyereHer ? `${plan.nyereHer} er nyere her og beholdes uendret. ` : '')
+          + 'Ingenting slettes. Nyeste versjon av hver registrering beholdes.',
       });
       if (!ok) return;
       let n = 0;
-      setLesing('Gjenoppretter …');
-      const res = await gjenopprett(kopi, () => setLesing(`Gjenoppretter bilder (${++n}) …`));
+      setLesing('Leser inn …');
+      const res = await gjenopprett(kopi, () => setLesing(`Leser inn bilder (${++n}) …`));
       setLesing(null);
       visMelding(`Ferdig: ${res.nye} nye, ${res.oppdatert} oppdatert, ${res.uendret} uendret.`);
     } catch (err) {
@@ -173,14 +176,54 @@ export function SikkerhetskopiPanel() {
       visMelding('Kunne ikke lese filen: ' + err.message);
     }
   };
+  return html`<input ref=${filRef} type="file" accept=".zip,application/zip" hidden onChange=${velgFil} />
+    ${lesing && html`<div class="info-boks">⏳ ${lesing}</div>`}
+    <button class=${'knapp full' + (stor ? ' primar stor' : '')} onClick=${() => filRef.current.click()}>${tekst}</button>`;
+}
+
+export function SikkerhetskopiPanel() {
+  const ctx = useCtx();
+  const siste = ctx.config.innstillinger.sisteSikkerhetskopi;
+
+  const lag = async (info) => {
+    info('Samler data og bilder …');
+    const { fil, antall } = await lagSikkerhetskopi((n) => info(`Pakker bilder (${n}) …`));
+    return { filer: [fil], melding: `${antall.befaringer} befaringer, ${antall.observasjoner} observasjoner, ${antall.fotos} bilder. Lagre filen et annet sted enn på enheten, f.eks. OneDrive eller e-post til deg selv.` };
+  };
 
   return html`<${Seksjon} tittel="Sikkerhetskopi">
-    <p class="hjelp">Alle befaringer, bilder og innstillinger i én zip-fil. Kan leses inn på denne eller en annen telefon.
+    <p class="hjelp">Alle befaringer, bilder og innstillinger i én zip-fil. Kan leses inn på denne eller en annen enhet.
       Siste sikkerhetskopi: <strong>${siste ? fmtDatoTid(siste) : 'aldri'}</strong>.</p>
-    <${EksportKnapp} ikon="💾" tittel="Ta sikkerhetskopi" beskrivelse="Alt på telefonen – data, bilder og valglister." lag=${lag}
+    <${EksportKnapp} ikon="💾" tittel="Ta sikkerhetskopi" beskrivelse="Alt på enheten – data, bilder og valglister." lag=${lag}
       etterDeling=${async () => { await markerSikkerhetskopiTatt(); visMelding('Sikkerhetskopi registrert.'); }} />
-    <input ref=${filRef} type="file" accept=".zip,application/zip" hidden onChange=${velgFil} />
-    ${lesing && html`<div class="info-boks">⏳ ${lesing}</div>`}
-    <button class="knapp full" onClick=${() => filRef.current.click()}>Gjenopprett fra fil …</button>
+    <${HentFil} tekst="Gjenopprett fra fil …" />
+  <//>`;
+}
+
+/** Valg av mappe på PC der befaringene lagres varig. Vises bare i nettlesere som støtter det. */
+export function ArbeidsmappePanel() {
+  const t = useArbeidsmappe();
+  if (!stottes() || !erPc()) return null;
+  const velg = async () => {
+    try {
+      await velgMappe();
+    } catch (e) {
+      if (e && e.name !== 'AbortError') visMelding('Kunne ikke velge mappen: ' + e.message);
+    }
+  };
+  return html`<${Seksjon} tittel="Arbeidsmappe">
+    <p class="hjelp">Nettleseren kan slette sine egne data. Velg derfor en mappe på PC-en, gjerne en SharePoint-mappe som er synkronisert.
+      Hver befaring lagres der som en egen fil, automatisk etter endringer. Bruk en undermappe, siden Chrome ikke godtar selve Dokumenter eller Skrivebord.</p>
+    ${t.status === 'av' && html`<button class="knapp primar full" onClick=${velg}>Velg arbeidsmappe …</button>`}
+    ${t.status !== 'av' && html`<p>Mappe: <strong>${t.navn}</strong>${t.sist ? ` · sist lagret ${fmtDatoTid(t.sist)}` : ''}${t.status === 'lagrer' ? ' · lagrer …' : ''}</p>`}
+    ${t.status === 'trengerTilgang' && html`<button class="knapp primar full" onClick=${giTilgang}>Gi tilgang til mappen</button>`}
+    ${t.status === 'feil' && html`<div class="info-boks advar">Kunne ikke lagre til mappen: ${t.feil}</div>`}
+    ${t.status !== 'av' && html`<div class="knapperad">
+      <button class="knapp" onClick=${() => lagreTilMappe({ alle: true })}>Lagre alt nå</button>
+      <button class="knapp" onClick=${velg}>Bytt mappe …</button>
+      <button class="knapp fare-tekst" onClick=${async () => {
+        if (await bekreft('Slutte å lagre til mappen?', { ok: 'Slutt', fare: true, detalj: 'Filene som ligger i mappen, slettes ikke.' })) await fjernMappe();
+      }}>Slutt å bruke</button>
+    </div>`}
   <//>`;
 }

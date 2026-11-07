@@ -22,6 +22,9 @@ export function fmtNum(n, maxDes = 2) {
   return String(r).replace('.', ',');
 }
 
+/** PC med stor skjerm og mus. Styrer tekster og nedlasting. Selve utseendet styres i CSS. */
+export const erPc = () => window.matchMedia('(min-width: 900px) and (pointer: fine)').matches;
+
 export const pad2 = (n) => String(n).padStart(2, '0');
 export const pad3 = (n) => String(n).padStart(3, '0');
 

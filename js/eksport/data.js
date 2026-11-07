@@ -1,6 +1,6 @@
 // Henter alle data for én befaring og bygger én felles «rapportmodell».
 // Word og PDF tegnes fra samme modell, så innhold, rekkefølge og figurnumre blir like.
-import { db, getInnstillinger } from '../db.js';
+import { db, getInnstillinger, hentFotoRader } from '../db.js';
 import { hentConfig } from '../config.js';
 import { profilTekst, obsNr, fmtDato, fmtDatoTid, fmtNum, ALVORLIGHET, norm360, pad2 } from '../util.js';
 import { stedForFoto } from '../bilder.js';
@@ -43,7 +43,7 @@ export async function hentBefaringData(befaringId) {
   };
   const malinger = gruppe(await db.malinger.where('befaringId').equals(befaringId).toArray());
   const sett = gruppe(await db.sprekkesett.where('befaringId').equals(befaringId).toArray());
-  const fotos = gruppe(await db.fotos.where('befaringId').equals(befaringId).toArray());
+  const fotos = gruppe(await hentFotoRader('befaringId', befaringId));
   for (const id in malinger) malinger[id].sort(etterTid);
   for (const id in sett) sett[id].sort(etterTid);
   for (const id in fotos) fotos[id].sort((x, y) => x.tid - y.tid);

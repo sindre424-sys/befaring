@@ -1,7 +1,7 @@
 // Bilder: komprimering, lagring og visning.
 // Bildene lagres i den lokale databasen på telefonen (maks 2000 px langside, JPEG).
 import { html, useState, useEffect } from './lib.js';
-import { db, add, patch, getInnstillinger, useBildeUrl } from './db.js';
+import { db, add, patch, getInnstillinger, useBildeUrl, hentFotoRader } from './db.js';
 import { uid, profilTekst } from './util.js';
 import { hentGpsPosisjon } from './logikk.js';
 import { TegningOverlegg } from './tegning.js';
@@ -150,7 +150,7 @@ export function FulltBilde({ foto }) {
 }
 
 export async function hentFotos(obsId) {
-  return (await db.fotos.where('obsId').equals(obsId).toArray())
+  return (await hentFotoRader('obsId', obsId))
     .filter((f) => !f.slettet)
     .sort((a, b) => a.tid - b.tid);
 }

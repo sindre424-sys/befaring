@@ -1,20 +1,47 @@
 // Sikkerhetskopi: alle data, bilder og konfigurasjon i én zip-fil – og innlesing av en slik fil.
 // Innlesing sletter aldri noe: data slås sammen, og nyeste versjon av hver rad beholdes.
-import { db, setInnstilling, getInnstillinger } from './db.js';
+import { db, setInnstilling, getInnstillinger, varsleLagret, hentFotoRader } from './db.js';
 import { lastJszip } from './eksport/last.js';
 import { APP_VERSJON } from './versjon.js';
 import { pad2 } from './util.js';
 
 const FORMAT = 'befaringsapp-sikkerhetskopi';
 const TABELLER = ['prosjekter', 'befaringer', 'observasjoner', 'malinger', 'sprekkesett', 'fotos'];
+const erLokal = (r) => r.key.startsWith('lokal:'); // gjelder bare denne enheten, f.eks. valgt arbeidsmappe
 
-export async function lagSikkerhetskopi(fremdrift = () => {}) {
+const filtrygg = (s) => String(s || '').replace(/[\\/:*?"<>|]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 40).trim();
+const dag = (t) => {
+  const d = new Date(t || Date.now());
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+};
+
+/** Filnavn for én befaring. Slutten av id-en gjør at to like befaringer ikke overskriver hverandre. */
+export async function befaringFilnavn(b) {
+  const p = b.prosjektId ? await db.prosjekter.get(b.prosjektId) : null;
+  const deler = ['Befaring', dag(b.start), filtrygg(p && p.navn), filtrygg(b.omrade), b.id.slice(0, 6)].filter(Boolean);
+  return deler.join(' ') + '.zip';
+}
+
+async function raderFor(t, befaringId) {
+  if (!befaringId) return db[t].toArray();
+  if (t === 'befaringer') return [await db.befaringer.get(befaringId)];
+  if (t === 'prosjekter') {
+    const b = await db.befaringer.get(befaringId);
+    const p = b.prosjektId ? await db.prosjekter.get(b.prosjektId) : null;
+    return p ? [p] : [];
+  }
+  if (t === 'fotos') return hentFotoRader('befaringId', befaringId);
+  return db[t].where('befaringId').equals(befaringId).toArray();
+}
+
+/** Lager fil med alt, eller med én befaring når befaringId er oppgitt (overføring mellom telefon og PC). */
+export async function lagSikkerhetskopi(fremdrift = () => {}, { befaringId = null } = {}) {
   const JSZip = await lastJszip();
   const zip = new JSZip();
   const tabeller = {};
   let bilder = 0;
   for (const t of TABELLER) {
-    const rader = await db[t].toArray();
+    const rader = await raderFor(t, befaringId);
     if (t === 'fotos') {
       tabeller[t] = [];
       for (const f of rader) {
@@ -35,10 +62,11 @@ export async function lagSikkerhetskopi(fremdrift = () => {}) {
       tabeller[t] = rader;
     }
   }
-  const innstillinger = await db.innstillinger.toArray();
+  const innstillinger = (await db.innstillinger.toArray()).filter((r) => !erLokal(r));
   const innhold = {
     format: FORMAT,
     formatVersjon: 1,
+    omfang: befaringId ? 'befaring' : 'alt',
     appVersjon: APP_VERSJON,
     laget: Date.now(),
     antall: Object.fromEntries(TABELLER.map((t) => [t, tabeller[t].length])),
@@ -52,7 +80,9 @@ export async function lagSikkerhetskopi(fremdrift = () => {}) {
     'Filen inneholder alle befaringer, observasjoner, målinger, sprekkesett, bilder og innstillinger.\n');
   const blob = await zip.generateAsync({ type: 'blob', mimeType: 'application/zip' });
   const d = new Date();
-  const navn = `Befaringsapp_sikkerhetskopi_${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}_${pad2(d.getHours())}${pad2(d.getMinutes())}.zip`;
+  const navn = befaringId
+    ? await befaringFilnavn(tabeller.befaringer[0])
+    : `Befaringsapp_sikkerhetskopi_${dag(d)}_${pad2(d.getHours())}${pad2(d.getMinutes())}.zip`;
   return { fil: new File([blob], navn, { type: 'application/zip' }), antall: innhold.antall };
 }
 
@@ -74,6 +104,21 @@ export async function lesSikkerhetskopi(fil) {
   const innhold = JSON.parse(await dataFil.async('string'));
   if (innhold.format !== FORMAT) throw new Error('Ukjent filformat.');
   return { zip, innhold };
+}
+
+/** Teller hva en innlesing vil gjøre, uten å skrive noe. */
+export async function forhandsvis({ innhold }) {
+  const res = { nye: 0, oppdateres: 0, likt: 0, nyereHer: 0 };
+  for (const t of TABELLER) {
+    for (const rad of innhold.tabeller[t] || []) {
+      const finnes = await db[t].get(rad.id);
+      if (!finnes) res.nye++;
+      else if ((finnes.updated || 0) < (rad.updated || 0)) res.oppdateres++;
+      else if ((finnes.updated || 0) === (rad.updated || 0)) res.likt++;
+      else res.nyereHer++;
+    }
+  }
+  return res;
 }
 
 /** Slår sammen sikkerhetskopien med det som finnes. Nyeste versjon (etter «updated») vinner. */
@@ -101,7 +146,13 @@ export async function gjenopprett({ zip, innhold }, fremdrift = () => {}) {
   }
   // Innstillinger og valglister: tas inn fra sikkerhetskopien, men tidspunkt for siste sikkerhetskopi beholdes lokalt.
   const lokal = await getInnstillinger();
-  for (const rad of innhold.innstillinger || []) {
+  const overforing = innhold.omfang === 'befaring';
+  for (const rad of (innhold.innstillinger || []).filter((r) => !erLokal(r))) {
+    // En overført befaring skal aldri endre oppsettet på enheten den leses inn på, bare fylle inn det som mangler.
+    if (overforing && rad.key !== 'config:egne') {
+      if (!(await db.innstillinger.get(rad.key))) await db.innstillinger.put(rad);
+      continue;
+    }
     if (rad.key === 'config:egne') {
       const her = await db.innstillinger.get('config:egne');
       await db.innstillinger.put({ key: rad.key, value: [...new Set([...(her ? her.value : []), ...(rad.value || [])])] });
@@ -111,6 +162,7 @@ export async function gjenopprett({ zip, innhold }, fremdrift = () => {}) {
       await db.innstillinger.put(rad);
     }
   }
+  varsleLagret();
   return res;
 }
 

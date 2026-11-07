@@ -3,8 +3,10 @@ import { db, useLive, lagringsInfo } from '../db.js';
 import { useCtx, typeCfg } from '../config.js';
 import { Topp, AlvorlighetPrikk } from '../ui.js';
 import { TypeIkon } from '../ikoner.js';
-import { fmtDato, fmtTid, isStandalone } from '../util.js';
+import { fmtDato, fmtTid, isStandalone, erPc } from '../util.js';
 import { trengerSikkerhetskopi } from '../sikkerhetskopi.js';
+import { HentFil } from './eksport.js';
+import { stottes, useArbeidsmappe, giTilgang } from '../arbeidsmappe.js';
 
 export function Start() {
   const ctx = useCtx();
@@ -25,14 +27,27 @@ export function Start() {
   const [kopi, setKopi] = useState(null);
   useEffect(() => { lagringsInfo().then(setLagring); trengerSikkerhetskopi().then(setKopi); }, []);
   const standalone = isStandalone();
+  const pc = erPc();
+  const mappe = useArbeidsmappe();
 
   return html`
     <${Topp} tittel="Befaringer" hoyre=${html`<a class="knapp flat ikonknapp" href="#/innstillinger" aria-label="Innstillinger">⚙︎</a>`} />
     <main class="innhold med-bunnknapp">
-      ${!standalone && html`<div class="info-boks">
+      ${!standalone && !pc && html`<div class="info-boks">
         <strong>Installer appen:</strong> Trykk Del-knappen i Safari → «Legg til på Hjem-skjerm».
         Åpne alltid appen fra ikonet. Safari og den installerte appen har hver sin lagring.
       </div>`}
+      ${pc && html`<section class="seksjon pc-hent">
+        <div class="pc-hent-tekst"><h2>Hent fra telefon</h2>
+          <p class="hjelp">På telefonen: åpne befaringen → Eksport → Send til PC, og lagre filen i OneDrive. Velg den her.</p></div>
+        <div class="pc-hent-knapp"><${HentFil} tekst="Hent fil …" stor /></div>
+      </section>`}
+      ${pc && stottes() && mappe.status === 'av' && html`<a class="info-boks advar blokk-lenke" href="#/innstillinger">
+        <strong>Velg arbeidsmappe:</strong> Data i nettleseren kan bli slettet. Gå til Innstillinger → Arbeidsmappe.</a>`}
+      ${mappe.status === 'trengerTilgang' && html`<div class="info-boks advar">
+        Chrome må få tilgang til arbeidsmappen «${mappe.navn}» igjen før endringer kan lagres der.
+        ${' '}<button class="lenke" onClick=${giTilgang}>Gi tilgang</button></div>`}
+      ${mappe.status === 'feil' && html`<a class="info-boks advar blokk-lenke" href="#/innstillinger">Kunne ikke lagre til arbeidsmappen. Trykk her for detaljer.</a>`}
       ${standalone && lagring && lagring.persistent === false && html`<div class="info-boks advar">
         Lagringen er ikke markert som vedvarende. Gå til Innstillinger → Lagring.
       </div>`}

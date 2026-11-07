@@ -5,6 +5,7 @@ import { lastStandardConfig, useConfigLive, Ctx } from './config.js';
 import { useRute } from './router.js';
 import { MeldingVert, DialogVert, flushAll } from './ui.js';
 import { hentInnUtkast } from './tegning.js';
+import { startArbeidsmappe } from './arbeidsmappe.js';
 import { Start } from './views/start.js';
 import { NyBefaring } from './views/ny-befaring.js';
 import { Befaring } from './views/befaring.js';
@@ -62,6 +63,7 @@ async function start() {
   await hentInnUtkast();
   render(html`<${App} />`, document.getElementById('app'));
   bePersistent();
+  startArbeidsmappe();
   registrerServiceWorker();
 }
 

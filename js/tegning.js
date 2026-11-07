@@ -6,7 +6,7 @@ import { db, patch, useBildeUrl } from './db.js';
 import { lagBygger, tilSvgTekst } from './skisser/svg.js';
 import { bekreft, visMelding } from './ui.js';
 import { useCtx } from './config.js';
-import { fmtNum, parseNum } from './util.js';
+import { fmtNum, parseNum, erPc } from './util.js';
 import {
   SYMBOLSTORRELSER, POLYGONSTIL, boltNavn, symbolBredde, nySymbolfigur, symbolSvg, polygonSvg, mengder, annenMengde,
 } from './sikring.js';
@@ -891,7 +891,7 @@ export function Tegnemodus({ foto, onLukk }) {
         <button class="knapp fare-tekst" disabled=${!figurer.length} onClick=${tom}>Tøm</button>
       </div>
       <button class="tegne-sum" onClick=${() => setVisMengder(!visMengder)}>Σ ${sammendrag || 'Ingen sikring tegnet'}</button>
-      <p class="hjelp">${hjelp} To fingre zoomer. Originalbildet endres ikke.</p>
+      <p class="hjelp">${hjelp} ${erPc() ? 'Musehjulet zoomer. Under Velg flytter du bildet ved å dra i tom flate.' : 'To fingre zoomer.'} Originalbildet endres ikke.</p>
     </div>
   </div>`;
 }

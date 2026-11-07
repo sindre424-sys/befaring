@@ -7,7 +7,7 @@ import { TypeIkon } from '../ikoner.js';
 import { go } from '../router.js';
 import { lastInnTestdata, fjernTestdata, harTestdata } from '../testdata.js';
 import { APP_VERSJON } from '../versjon.js';
-import { SikkerhetskopiPanel } from './eksport.js';
+import { SikkerhetskopiPanel, ArbeidsmappePanel } from './eksport.js';
 
 const MB = (b) => (b === null || b === undefined ? '?' : (b / 1024 / 1024).toFixed(1).replace('.', ',') + ' MB');
 
@@ -88,9 +88,10 @@ export function Innstillinger() {
           visMelding(ok ? 'Lagringen er vedvarende.' : 'Nettleseren sa nei. Installer appen på Hjem-skjermen og prøv igjen.');
           oppdaterInfo();
         }}>Be om vedvarende lagring</button>
-        <p class="hjelp">Alle data ligger kun på denne telefonen. Appen kan teknisk sett ikke sende data til noen server.</p>
+        <p class="hjelp">Alle data ligger kun på denne enheten og i mapper du velger selv. Appen kan teknisk sett ikke sende data til noen server.</p>
       <//>
 
+      <${ArbeidsmappePanel} />
       <${SikkerhetskopiPanel} />
 
       <${Seksjon} tittel="Testdata">

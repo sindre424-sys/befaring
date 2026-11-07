@@ -152,6 +152,27 @@ Ta sikkerhetskopi før du oppdaterer. For å se de nye testdataene: Innstillinge
 12. Lag en Word-rapport. Symbolene skal være med på bildet, og mengdene skal stå i figurteksten.
 13. Gå til **Innstillinger → Felles valglister → Boltetyper**, legg til og fjern et valg.
 
+## Teste versjon 0.7.0 (PC og overføring)
+
+Bruk bare testdata.
+
+På telefonen:
+1. Oppdater appen og sjekk at den viser versjon 0.7.0.
+2. Last inn testdata under Innstillinger hvis du ikke har dem, og åpne test-befaringen.
+3. Velg **Eksport → Send til PC → Lag fil**, trykk del, og lagre filen i OneDrive.
+
+På PC-en (Chrome):
+4. Åpne https://sindre424-sys.github.io/befaring/
+5. Trykk **Hent fil …** øverst, velg filen fra OneDrive, og trykk **Les inn**.
+6. Åpne befaringen. Sjekk tekst, skisser, bilder og sikringssymboler.
+7. Gå til **Innstillinger → Arbeidsmappe → Velg arbeidsmappe**. Velg en ny undermappe, for eksempel i SharePoint-mappen din, og trykk **Rediger filer** eller **Tillat** hvis Chrome spør.
+8. Sjekk i Filutforsker at det ligger en zip-fil for befaringen i mappen.
+9. Endre en tekst, vent et minutt, og sjekk at filen har nytt tidspunkt.
+10. Åpne et bilde og trykk **Tegn og sikring**. Plasser symboler med mus, zoom med hjulet, og dra et symbol under **Velg**.
+11. Lag et Word-dokument under Eksport. Filen skal lastes ned.
+12. Lukk Chrome og åpne appen igjen. Trykk **Gi tilgang** hvis appen ber om det, og sjekk at data er der.
+13. Installer gjerne appen med ikonet til høyre i adressefeltet. Den installerte appen deler data med fanen i Chrome.
+
 ## Oppbygging (for den som vil se i koden)
 
 | Mappe/fil | Innhold |

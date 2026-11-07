@@ -457,3 +457,38 @@ input[type='datetime-local'] { min-width: 0; max-width: 100%; display: block; }
 .tegne-mengder { padding: 8px 12px; background: #1b1b1b; max-height: 38vh; overflow-y: auto; touch-action: pan-y; }
 .mengde-rad { display: flex; align-items: center; gap: 10px; padding: 4px 0; font-size: 15px; }
 .mengde-rad span { flex: 1; }
+
+/* ---------- PC: stor skjerm og mus ---------- */
+.pc-hent { display: flex; align-items: center; gap: 16px; }
+.pc-hent-tekst { flex: 1; }
+.pc-hent-knapp { flex: none; width: 200px; }
+@media (min-width: 900px) and (pointer: fine) {
+  :root { --trykk: 42px; }
+  .innhold { max-width: 1240px; padding: 20px 24px 32px; }
+  .topp-rad { max-width: 1240px; margin: 0 auto; padding: 0 24px; }
+  a.kort:hover, button.kort:hover, .chip:hover { filter: brightness(0.96); }
+  .knapp { cursor: pointer; }
+  .bunnlinje { justify-content: center; }
+  .bunnlinje .knapp.full { flex: 0 1 360px; }
+
+  /* Befaringslisten og observasjonsskjemaet bruker bredden. Delene står i faste rader, så de ikke hopper mens du skriver. */
+  .innhold.obs-skjema { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
+  .obs-skjema > * { grid-column: 1 / -1; margin-bottom: 0; }
+  .obs-skjema > .seksjon:not(.bred) { grid-column: auto; }
+  .fullt-ramme .fullt-bilde { max-height: calc(100vh - 170px); }
+  .visning-knapper { justify-content: center; }
+  .visning-knapper .knapp { flex: 0 1 240px; }
+  .foto-kort { max-width: 560px; }
+  .seksjon.bred .foto-kort { display: inline-block; width: calc(50% - 8px); margin-right: 8px; vertical-align: top; max-width: none; }
+
+  /* Tegneverktøyet: stort bilde og verktøy i egen kolonne */
+  .tegnemodus { display: grid; grid-template-columns: minmax(0, 1fr) 360px; grid-template-rows: auto minmax(0, 1fr) auto auto; }
+  .tegne-topp { grid-column: 1 / -1; }
+  .tegne-flate { grid-column: 1; grid-row: 2 / -1; cursor: crosshair; }
+  .tegne-mengder, .tegne-tekst { grid-column: 2; }
+  .tegne-verktoy { grid-column: 2; grid-row: 2; max-height: none; overflow-y: auto; }
+  .tegne-mengder { grid-row: 3; }
+  .tegne-tekst { grid-row: 4; }
+  .symbol-rad { flex-wrap: wrap; overflow: visible; }
+  .symbol-knapp { width: 76px; cursor: pointer; }
+}

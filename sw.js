@@ -1,6 +1,6 @@
 // Service worker: lagrer hele appen lokalt slik at den virker 100 % uten nett.
 // VIKTIG: Øk VERSJON ved hver endring, ellers får ikke telefonen den nye versjonen.
-const VERSJON = '0.6.2';
+const VERSJON = '0.7.0';
 const CACHE = 'befaring-' + VERSJON;
 
 const FILER = [
@@ -42,6 +42,7 @@ const FILER = [
   'js/views/eksport.js',
   'js/utm.js',
   'js/sikkerhetskopi.js',
+  'js/arbeidsmappe.js',
   'js/eksport/last.js',
   'js/eksport/data.js',
   'js/eksport/tekster.js',

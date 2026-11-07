@@ -1,5 +1,8 @@
 // Deling via iOS-delingsarket (Mail, Filer, OneDrive …). På PC lastes filen ned i stedet.
+import { erPc } from '../util.js';
+
 export function kanDele(filer) {
+  if (erPc()) return false; // Chrome på Windows har egen deling, men her skal filen lastes ned
   try {
     return !!(navigator.canShare && navigator.share && navigator.canShare({ files: filer }));
   } catch (e) {

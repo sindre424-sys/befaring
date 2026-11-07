@@ -1,4 +1,4 @@
-// Lokal database (IndexedDB via Dexie). Alle data ligger kun på telefonen.
+// Lokal database (IndexedDB via Dexie). Alle data ligger kun på enheten.
 import Dexie, { liveQuery } from '../vendor/dexie.mjs';
 import { useState, useEffect } from './lib.js';
 
@@ -20,7 +20,7 @@ export function onLagret(fn) {
   lagretLyttere.add(fn);
   return () => lagretLyttere.delete(fn);
 }
-function varsleLagret() {
+export function varsleLagret() {
   for (const fn of lagretLyttere) fn(Date.now());
 }
 
@@ -55,25 +55,41 @@ async function ferskeBilder(table, id) {
   return ut;
 }
 
+async function oppdaterBefaring(table, id, now) {
+  if (table === 'befaringer' || table === 'prosjekter') return;
+  const rad = await db[table].get(id);
+  if (rad && rad.befaringId) await db.befaringer.update(rad.befaringId, { updated: now });
+}
+
 /** Oppdaterer felt. Støtter punktnotasjon, f.eks. {'sted.side': 'Høyre'}. */
 export async function patch(table, id, changes) {
   const now = Date.now();
   await db[table].update(id, { ...changes, ...(await ferskeBilder(table, id)), updated: now });
-  if (table !== 'befaringer' && table !== 'prosjekter') {
-    const rad = await db[table].get(id);
-    if (rad && rad.befaringId) await db.befaringer.update(rad.befaringId, { updated: now });
-  }
+  await oppdaterBefaring(table, id, now);
   varsleLagret();
 }
 
 /** «Sletting» flytter til papirkurven. Ingenting forsvinner for godt. */
 export async function softDelete(table, id) {
-  await db[table].update(id, { slettet: Date.now(), ...(await ferskeBilder(table, id)) });
+  const now = Date.now();
+  await db[table].update(id, { slettet: now, ...(await ferskeBilder(table, id)), updated: now }); // updated gjør at slettingen følger med ved overføring
+  await oppdaterBefaring(table, id, now);
   varsleLagret();
 }
 export async function restore(table, id) {
-  await db[table].update(id, { slettet: null, ...(await ferskeBilder(table, id)), updated: Date.now() });
+  const now = Date.now();
+  await db[table].update(id, { slettet: null, ...(await ferskeBilder(table, id)), updated: now });
+  await oppdaterBefaring(table, id, now);
   varsleLagret();
+}
+
+/**
+ * Bilder for en observasjon eller befaring. Safari kan gi bildedata som ikke lar seg lese når raden hentes
+ * direkte via et oppslag på obsId eller befaringId. Derfor finnes id-ene først, og radene hentes etterpå.
+ */
+export async function hentFotoRader(felt, verdi) {
+  const ider = await db.fotos.where(felt).equals(verdi).primaryKeys();
+  return (await db.fotos.bulkGet(ider)).filter(Boolean);
 }
 
 // ---------- Innstillinger ----------

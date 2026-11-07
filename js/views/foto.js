@@ -54,7 +54,7 @@ export function FotoSeksjon({ o }) {
   const ovrige = fotos.filter((f) => f.id !== sisteId);
   const standardSted = stedForFoto(o);
 
-  return html`<${Seksjon} tittel=${`Bilder (${fotos.length})`}>
+  return html`<${Seksjon} tittel=${`Bilder (${fotos.length})`} klasse="bred">
     <input ref=${kamera} type="file" accept="image/*" capture="environment" hidden onChange=${(e) => mottaFiler(e, true)} />
     <input ref=${bibliotek} type="file" accept="image/*" multiple hidden onChange=${(e) => mottaFiler(e, false)} />
 
