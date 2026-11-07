@@ -127,6 +127,11 @@ export function Eksport({ id }) {
         <p class="hjelp">Figurnumrene i Excel og bilde-zip følger valgene her, så lag gjerne alle filene med samme valg.</p>
       <//>
 
+      ${erPc() && html`<a class="kort" href=${'#/arbeidsbeskrivelse/' + id}>
+        <span class="eksport-ikon">📽</span>
+        <div class="kort-tekst"><div class="kort-tittel">Arbeidsbeskrivelse (PowerPoint)</div>
+          <div class="kort-under">Fyller ut malen med bilder, symboler og mengder.</div></div>
+        <span class="pil">›</span></a>`}
       <${EksportKnapp} ikon="💻" tittel=${erPc() ? 'Lagre som overføringsfil' : 'Send til PC'}
         beskrivelse=${erPc() ? 'Hele befaringen med bilder i én fil. Kan leses inn på telefonen eller en annen PC.' : 'Hele befaringen med bilder i én fil. Lagre den i OneDrive og hent den i appen på PC-en.'}
         lag=${async (info) => {

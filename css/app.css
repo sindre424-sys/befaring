@@ -458,6 +458,17 @@ input[type='datetime-local'] { min-width: 0; max-width: 100%; display: block; }
 .mengde-rad { display: flex; align-items: center; gap: 10px; padding: 4px 0; font-size: 15px; }
 .mengde-rad span { flex: 1; }
 
+/* ---------- Arbeidsbeskrivelse ---------- */
+.ab-felt { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 0 12px; }
+.ab-versjon { display: grid; grid-template-columns: 0.6fr 0.8fr 1.4fr 1fr 1fr 1fr; gap: 0 8px; }
+.ab-side { border-top: 1px solid var(--kant); padding: 10px 0; }
+.ab-side-topp { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.ab-side-innhold { display: grid; grid-template-columns: 200px minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.ab-bilde .miniatyr { width: 100%; }
+.ab-bolt { display: grid; grid-template-columns: 1fr 1.3fr; gap: 8px; align-items: center; margin-bottom: 6px; font-size: 0.92rem; }
+.ab-bolt select { min-height: 40px; }
+.ab-annen { display: flex; justify-content: space-between; gap: 8px; padding: 4px 0; font-size: 0.92rem; }
+
 /* ---------- PC: stor skjerm og mus ---------- */
 .pc-hent { display: flex; align-items: center; gap: 16px; }
 .pc-hent-tekst { flex: 1; }

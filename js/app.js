@@ -14,6 +14,7 @@ import { Innstillinger } from './views/innstillinger.js';
 import { TypeRedigerer, FellesRedigerer } from './views/config-editor.js';
 import { Prosjekter, Prosjekt, Papirkurv } from './views/diverse.js';
 import { Eksport } from './views/eksport.js';
+import { Arbeidsbeskrivelse } from './views/arbeidsbeskrivelse.js';
 
 function Side({ rute }) {
   const [a, b, c] = rute.deler;
@@ -23,6 +24,7 @@ function Side({ rute }) {
     case 'befaring': return html`<${Befaring} key=${b} id=${b} />`;
     case 'obs': return html`<${Observasjon} key=${b} id=${b} ny=${rute.q.ny === '1'} />`;
     case 'eksport': return html`<${Eksport} key=${b} id=${b} />`;
+    case 'arbeidsbeskrivelse': return html`<${Arbeidsbeskrivelse} key=${b} id=${b} />`;
     case 'innstillinger':
       if (b === 'type') return html`<${TypeRedigerer} key=${c} id=${c} />`;
       if (b === 'felles') return html`<${FellesRedigerer} />`;

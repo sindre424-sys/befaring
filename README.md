@@ -173,6 +173,21 @@ På PC-en (Chrome):
 12. Lukk Chrome og åpne appen igjen. Trykk **Gi tilgang** hvis appen ber om det, og sjekk at data er der.
 13. Installer gjerne appen med ikonet til høyre i adressefeltet. Den installerte appen deler data med fanen i Chrome.
 
+## Teste versjon 0.8.0 (arbeidsbeskrivelse i PowerPoint)
+
+Bruk bare testdata. Malen hentes fra PC-en din og legges aldri i repoet.
+
+1. Tegn symboler og områder på noen testbilder, ett stående og ett liggende bilde hvis du har det, og overfør befaringen til PC-en.
+2. Åpne befaringen på PC-en og velg **Eksport → Arbeidsbeskrivelse (PowerPoint)**.
+3. Trykk **Velg mal …** og velg `MAL_Arbeidsbeskrivelse sikring.pptm`.
+4. Fyll inn **Dokument** og **Versjoner**.
+5. Under **Sider**: velg boltetype, skriv kommentar, og endre rekkefølgen hvis du vil.
+6. Trykk **Lag PowerPoint** og åpne filen.
+7. Sjekk at PowerPoint ikke ber om å reparere filen.
+8. Sjekk forside, versjoner, sidetall og oppdragsinfo på alle sider.
+9. Sjekk at symbolene i tabellen står på linje med teksten, og at antall og m² stemmer.
+10. Dra et symbol i PowerPoint for å se at det kan flyttes.
+
 ## Oppbygging (for den som vil se i koden)
 
 | Mappe/fil | Innhold |

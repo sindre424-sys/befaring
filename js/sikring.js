@@ -68,7 +68,7 @@ export function symbolSvg(S, fg, cx, cy, d) {
     bunn = cy + r;
     const tynn = { ...stil, 'stroke-width': sw * 0.65 };
     deler.push(S('polygon', { points: tilPunkter(mangekant(cx, cy, r, 3)), ...tynn }));
-    deler.push(S('polygon', { points: tilPunkter(mangekant(cx, cy, r, 3, Math.PI / 2)), ...tynn }));
+    deler.push(S('polygon', { points: tilPunkter(mangekant(cx, cy, r, 3, Math.PI / 2)), ...tynn, fill: 'none' }));
   } else if (fg.form === 'sirkelkryss') {
     const k = r * 0.9;
     const dg = k * Math.SQRT1_2;
@@ -134,7 +134,7 @@ export function mengder(tegning) {
   }
   return {
     bolter: [...bolter.values()].sort((a, b) => a.lengde - b.lengde || a.dim - b.dim),
-    annen: [...annen.values()],
+    annen: [...annen.values()].sort((a, b) => a.art.localeCompare(b.art)),
   };
 }
 
